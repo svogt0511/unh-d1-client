@@ -1,0 +1,6 @@
+name = UNH D1 Client
+description = This module enables DestinyOne client capabilities for UNH Drupal sites.
+version = "7.x-0.0-alpha-0"
+core = 7.x
+package = "D1"
+configure = admin/config/unh-d1/unh-d1-client-settings

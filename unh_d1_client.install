@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @file
+ *
+ * Install basic configurations for Destiny One integration.
+ */
+
+/**
+ * Get 'helper' functions and constants.
+ */
+
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.constants.inc';
+
+/**
+* Implements hook_install().
+*/
+function unh_d1_client_install() {
+  variable_set('unh_d1_client_api_release', UNH_D1_CLIENT_API_RELEASE);
+  variable_set('unh_d1_client_cache_error_time', UNH_D1_CLIENT_CACHE_ERROR_TIME);
+  variable_set('unh_d1_client_cache_time', UNH_D1_CLIENT_CACHE_TIME);
+  variable_set('unh_d1_client_domain_be', UNH_D1_CLIENT_DOMAIN_BE);
+  variable_set('unh_d1_client_domain_fe', UNH_D1_CLIENT_DOMAIN_FE);
+  variable_set('unh_d1_client_domain_public', UNH_D1_CLIENT_DOMAIN_PUBLIC);
+  variable_set('unh_d1_client_webservice_path', UNH_D1_CLIENT_WEBSERVICE_PATH);
+}
+
+
+/**
+* Implements hook_uninstall().
+*/
+function unh_d1_client_uninstall() {
+ // Get global variable array
+ global $conf;
+ foreach (array_keys($conf) as $key) {
+   // Find variables that have the module prefix
+   if (strpos($key, 'd1client_') === 0) {
+     variable_del($key);
+   }
+ }
+}
+
+
+/**
+ * Implements hook_update_N().
+ *
+ * Setting default variable values.
+ */
+//function d1client_update_7100() {
+//  variable_set('d1client_cache_time', 3600*3);
+//}
+
+
+/**
+ * Implements hook_requirements().
+ */
+function unh_d1_client_requirements($phase) {
+  if($phase == 'runtime') {
+
+  }
+}
