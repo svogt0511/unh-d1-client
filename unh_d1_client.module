@@ -1,0 +1,263 @@
+<?php
+/**
+ * @file
+ *
+ * @todo: Update this docblock.
+ *
+ * This is the main module file.
+ *
+ * This module implements the DestinyOne v5.5 API calls - specifically, the DestinyOne public
+ * interface using REST and JSON.
+ *
+ * There are other flavors of the api:
+ *
+ *  public vs internal interface
+ *  soap vs. rest
+ *  xml vs. json
+ *
+ * The oldest version of the API is SOAP/XML based.  It is the most functional and most
+ * complete.
+ *
+ * The internal interface requires a login (via a service account) and offers much more
+ * functionality which we don't currently use.  It is SOAP/XML-based.  (No rest/json).
+ * It requires a login to get a session id, and then the session id is used in subsequent
+ * requests.
+ *
+ * The functions here are implemented via drupal_http_request:
+ *
+ *    https://api.drupal.org/api/drupal/includes%21common.inc/function/drupal_http_request/7.x
+ *
+ * Pertinent D1 documentation is:
+ *
+ *    DESTINY CONNECT WEB SERVICES REFERENCE, V1.04 (October 2016) - documents the web
+ *      service equests.
+ *
+ *    PUBLIC VIEW 2.0 IMPLEMENTATION GUIDE - explains how to do enrollement via a
+ *      generated link or ajax ('shopping cart').  Also has other tips for D1 clients who
+ *      implement the public view with their own content management system and the D1 API.
+ *
+ *    The GROW.DESTINYSOLUTIONS.COM web site - a community knowledge base.  You can get
+ *      answers to your questions quicker here than you can by submitting a ticket.
+ *
+ *  **See the WEB SERVICES REFERENCE for definitions of the API data structures.
+ *
+ * UPDATE - DestinyOne v5.4 (Iceman) and Web Services Connect 2.0:
+ *
+ * From the DestinyOne v5.4 Release Notes:
+ *
+ *   You can retrieve the WSDL definition file for SOAP web services using the following URL:
+ *
+ *     https://{webservice.domain.name}/webservice/PublicViewService?wsdl
+ *
+ *   The WADL definition file for RESTful web services using the following URL:
+ *
+ *     https://{webservice.domain.name}/webservice/PublicViewREST?_wadl&_type=xml
+ *
+ * See the configuration form, below for url and other D1 API config settings.
+ *
+ *
+ */
+
+/**
+ * Get 'helper' functions and constants.
+ */
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.constants.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.webservices_v54.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function unh_d1_client_menu() {
+  $items = array();
+
+  // Admin main page for d1 config.
+  $items['admin/config/unh-d1'] = array(
+    'title' => 'UNH DestinyOne',
+    'description' => 'UNH settings for DestinyOne web services.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  // Admin config page for d1client module.
+  $items['admin/config/unh-d1/unh-d1-client-settings'] = array(
+    'title' => 'UNH D1: Client Settings',
+    'description' => 'Configuration UNH DestinyOne API web client.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('unh_d1_client_settings_form'),
+    'access arguments' => array('administer unh_d1_client'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  // Error page - service unavailable
+  $items['unh-d1-service-unavailable'] = array(
+    'title' => t('UNH D1 Service Unavailable'),
+    'description' => 'UNH D1 Client Module - Report that the DestinyOne API is unavailable. (Getting 500 error codes.)',
+    'page callback' => 'unh_d1_client_service_unavailable',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+* Implements hook_permission().
+*/
+function unh_d1_client_permission() {
+  return array(
+    'administer unh_d1_client' => array(
+      'title' => t('Administer UNH D1 Client Settings'),
+      'description' => t('Configure UNH Client module settings for this site.'),
+    ),
+  );
+}
+
+/**
+ * Page callback: Implements the unh_d1_client_service_unavailable page.
+ *
+ * Reports that we are currently unable to process user requests.
+ * The reason for this is 500 errors being reported by the
+ * DestinyOne API.
+ */
+function unh_d1_client_service_unavailable() {
+  $content = '<p>This service is currently unavailable.&nbsp;We apologize for any inconvenience.</p>
+<p>Please try back later.</p>
+';
+  // ... do something and add to $content;
+  return $content;
+}
+
+/**
+ * Form constructor for the UNH D1 Client admin settings form.
+ */
+function unh_d1_client_settings_form($form, &$form_state) {
+
+  $form['unh_d1_client_api_release'] = array(
+    '#type' => 'select',
+    '#title' => t('D1 API Release'),
+    '#options' => UNH_D1_API_VERSION_OPTIONS,
+    '#field_name' => 'unh_d1_client_api_release',
+    '#default_value' => variable_get('unh_d1_client_api_release', UNH_D1_CLIENT_API_RELEASE),
+    '#description' => t('The remote D1 API Release and associated Public View (PV) functionality.  (Please remember https will not work in the test environment.)'),
+    '#required' => TRUE,
+  );
+
+  $form['unh_d1_client_webservice_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('UNH D1 Web Service URL'),
+    '#size' => 256,
+    '#field_name' => 'unh_d1_client_webservice_path',
+    '#default_value' => variable_get('unh_d1_client_webservice_path', UNH_D1_CLIENT_WEBSERVICE_PATH),
+    '#description' => t('The D1 web service url. API requests are built using this url.'),
+    '#required' => TRUE,
+  );
+
+  $form['unh_d1_client_domain_fe'] = array(
+    '#type' => 'textfield',
+    '#title' => t('UNH D1 Domain - Web Service Front End'),
+    '#size' => 256,
+    '#field_name' => 'unh_d1_client_domain_fe',
+    '#default_value' => variable_get('unh_d1_client_domain_fe', UNH_D1_CLIENT_DOMAIN_FE),
+    '#description' => t('The D1 web service front end domain.  Requests outside of the API are built using this domain.'),
+    '#required' => TRUE,
+  );
+
+  $form['unh_d1 client_domain_be'] = array(
+    '#type' => 'textfield',
+    '#title' => t('UNH D1 Domain - Administrative'),
+    '#size' => 256,
+    '#field_name' => 'unh_d1_client_domain_admin',
+    '#default_value' => variable_get('unh_d1_client_domain_be', UNH_D1_CLIENT_DOMAIN_BE),
+    '#description' => t('The D1 server administrative domain.'),
+    '#required' => TRUE,
+  );
+
+  $form['unh_d1_client_domain_public'] = array(
+    '#type' => 'textfield',
+    '#title' => t('UNH D1 Domain - Public'),
+    '#size' => 256,
+    '#field_name' => 'unh_d1_client_domain_public',
+    '#default_value' => variable_get('unh_d1_client_domain_public', UNH_D1_CLIENT_DOMAIN_PUBLIC),
+    '#description' => t('The D1 server public facing domain.'),
+    '#required' => TRUE,
+  );
+
+  $form['unh_d1_client_cache_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cache Lifetime'),
+    '#size' => 256,
+    '#field_name' => 'unh_d1_client_cache_time',
+    '#default_value' => variable_get('unh_d1_client_cache_time', UNH_D1_CLIENT_CACHE_TIME),
+    '#description' => t('How long API-fetched data is kept (in seconds).  Default: 10800 seconds (3 hours).'),
+    '#required' => TRUE,
+  );
+
+  $form['unh_d1_client_cache_error_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Cache Error Lifetime'),
+    '#size' => 256,
+    '#field_name' => 'unh_d1_client_cache_error_time',
+    '#default_value' => variable_get('unh_d1_client_cache_error_time', UNH_D1_CLIENT_CACHE_ERROR_TIME),
+    '#description' => t('How long API-fetched data is kept (in seconds) if there was an error return from the webservice.  Default: 1800 seconds (30 minutes).'),
+    '#required' => TRUE,
+  );
+
+
+  $form['verify_connection'] = array(
+    '#type' => 'submit',
+    '#value' => 'Verify Connection',
+    '#submit' => array('unh_d1_client_settings_form_verify_connection'),
+    '#description' => t('Click this button to verify the connection to the D1 Web Service.')
+  );
+
+  $form = system_settings_form($form);
+  $form['#submit'][] = 'unh_d1_client_settings_form_custom_submit';
+  return $form;
+
+}
+
+function unh_d1_client_settings_form_validate($form, &$form_state){
+
+}
+
+function unh_d1_client_settings_form_custom_submit($form, &$form_state){
+
+  // Does this even work? (drupal_flush_all_caches)
+  drupal_flush_all_caches();
+  drupal_set_message('All caches have been cleared.', 'status', FALSE);
+}
+
+
+function unh_d1_client_settings_form_verify_connection($form, &$form_state){
+  // Make a really simple request to figure out if the service is running.
+  //list($code, $error, $result) = d1client_baseEntities('programAreas');
+  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_API_RQST_PA);
+  ddl($code, '$code');
+  ddl($error, '$error');
+  ddl($result, '$result');
+  // @todo - Finish this function.
+  // @todo - Fix the error message in the 'else'.
+  $code = '200';
+
+  if ($code == '200') {
+    drupal_set_message('Successful connection made!! (Code: ' . $code . ')', 'status', FALSE);
+  } else {
+    drupal_set_message('Could not make a connection.' .
+      (!empty($code) ? ' (Code: ' . $code . ')' : ' (Code: none)') .
+      (!empty($error['msg']) ? ' (' . $error['msg'] . ')' : ''),
+      'status', FALSE
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
