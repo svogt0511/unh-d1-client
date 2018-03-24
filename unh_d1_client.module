@@ -235,11 +235,10 @@ function unh_d1_client_settings_form_verify_connection($form, &$form_state){
   // Make a really simple request to figure out if the service is running.
   //list($code, $error, $result) = d1client_baseEntities('programAreas');
   list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_API_RQST_PA);
-  ddl($code, '$code');
-  ddl($error, '$error');
-  ddl($result, '$result');
+  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_API_RQST_PA);
   // @todo - Finish this function.
   // @todo - Fix the error message in the 'else'.
+
   $code = '200';
 
   if ($code == '200') {

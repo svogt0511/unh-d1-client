@@ -25,45 +25,46 @@ function unh_d1_client_request($op = '', $baseEntity = '', $options = array(), $
     'Unable to make webservice request - $op = ' . $op . (!empty($baseEntity) ? '$baseEntity = ' . $baseEntity : ''),
     NULL,
   );
+  
+  $options['_type'] = UNH_D1_CLIENT_WEBSVC_RSP_FMT;
 
   // Set url.
   $url = variable_get('unh_d1_client_webservice_path') . (!empty($op) ? '/' . $op : '') . (!empty($baseEntity) ? '/' . $baseEntity : '');
   $url .= (!empty($options) ? '?' . drupal_http_build_query($options) : '');
-  ddl($url, '$url');
-  // Set options.
-  $opts['method'] = $method;
 
-  if ((strtoupper($method) == 'POST') && (!empty($criteria))) {
-    // @todo: process and add $criteria to request.
-    $opts['data'] = $criteria;
+  // Set body opts.
+  $opts['method'] = $method;
+  if (strtoupper($method) == 'POST') {
+    $opts['Content-Type'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
+    if (!empty($criteria)) {
+      // @todo: process and add $criteria to request.
+      $opts['data'] = $criteria;
+    }
   }
   // $options['headers'] = array('Authorization' => 'Bearer ' . variable_get('api_key'));
 
   // Determine cache status.
   $d1_cache = &drupal_static('d1_requests');
-  $key = _unh_d1_client_cache_key($url . $opts);
+  $key = _unh_d1_client_cache_key($url . http_build_query($opts));
 
   if (isset($d1_cache[$key])) {
     $ret = $d1_cache[$key];
-    ddl('GETTING CACHED VALUE');
+    // ddl('GETTING CACHED VALUE!!');
   }
   else {
     $result = drupal_http_request($url, $opts);
-    ddl($result, '$result abc');
-    ddl($url, '$url');
-    ddl($opts, '$opts');
 
     if ($result->code == '200') {
       $decoded_result = json_decode($result->data, TRUE);
       $ret = array($result->code, NULL, $decoded_result);
-      $ds_cache[$key] = $ret;
-      ddl('STORING CACHED VALUE');
+      $d1_cache[$key] = $ret;
+      // ddl("STORING CACHED VALUE!!");
     }
     else {
       $ret = array($result->code, 'error is: ' . $result->data, NULL);
     }
   }
-  ddl($ret, '$ret direct');
+
   return $ret;
 }
 
