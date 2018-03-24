@@ -14,7 +14,11 @@
 define("UNH_D1_CLIENT_API_VERSION_54", "2");
 define("UNH_D1_CLIENT_API_VERSION_55", "3");
 
-// List of options for the config menu.
+/**
+ * Configuration Form
+ */
+ 
+// List of options for the config form.
 const UNH_D1_API_VERSION_OPTIONS = array(
   // UNH_D1_CLIENT_API_VERSION_53 => 'V5.3',
   // UNH_D1_CLIENT_API_VERSION_54_LEGACY => 'v5.4 Legacy',
@@ -22,9 +26,7 @@ const UNH_D1_API_VERSION_OPTIONS = array(
   UNH_D1_CLIENT_API_VERSION_55 => 'v5.5'
 );
 
-/**
- * Default configuration values.
- */
+// Default values for the config form. 
 define("UNH_D1_CLIENT_API_RELEASE", UNH_D1_CLIENT_API_VERSION_55);
 define("UNH_D1_CLIENT_CACHE_ERROR_TIME", 300);
 define("UNH_D1_CLIENT_CACHE_TIME", 3600*3);
@@ -63,6 +65,10 @@ const UNH_D1_CLIENT_API_REQUESTS = [
   ]
 ];
 
-
+/**
+ * Webservice constants.
+ */
+define("UNH_D1_CLIENT_WEBSVC_RSP_FMT", "json");
+define("UNH_D1_CLIENT_WEBSVC_RSQST_FMT", "application/json");
 
 
