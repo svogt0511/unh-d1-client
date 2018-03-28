@@ -4,6 +4,7 @@
  * @file
  *
  * @todo: Update this docblock.
+ * @todo: move program area setting to this module
  *
  * Implements DestinyOne v5.4/5.5 API requests, specifically using REST/JSON.
  */
@@ -17,97 +18,60 @@
 /**
  * Implements a webservice request.
  *
- * @todo: finish this function!
+ * @todo: process the error returns
  */
-function unh_d1_client_request($op = '', $baseEntity = '', $options = array(), $criteria = array(), $method = 'GET') {
+function unh_d1_client_request($request = '', $baseEntity = '', $options = array(), $criteria = array(), $method = 'GET') {
   $ret = array(
     '500',
-    'Unable to make webservice request - $op = ' . $op . (!empty($baseEntity) ? '$baseEntity = ' . $baseEntity : ''),
+    'Unable to make webservice request - $request = ' . $request . (!empty($baseEntity) ? '$baseEntity = ' . $baseEntity : ''),
     NULL,
   );
-  
-  $options['_type'] = UNH_D1_CLIENT_WEBSVC_RSP_FMT;
 
-  // Set url.
-  $url = variable_get('unh_d1_client_webservice_path') . (!empty($op) ? '/' . $op : '') . (!empty($baseEntity) ? '/' . $baseEntity : '');
-  $url .= (!empty($options) ? '?' . drupal_http_build_query($options) : '');
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
+    
+    $url_opts = _unh_d1_client_build_request_opts($request, $options);
 
-  // Set body opts.
-  $opts['method'] = $method;
-  if (strtoupper($method) == 'POST') {
-    $opts['Content-Type'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
-    if (!empty($criteria)) {
-      // @todo: process and add $criteria to request.
-      $opts['data'] = $criteria;
+    // Set url.
+    $url = variable_get('unh_d1_client_webservice_path') . (!empty($request) ? '/' . $request : '') . (!empty($baseEntity) ? '/' . $baseEntity : '');
+    $url .= (!empty($url_opts) ? '?' . drupal_http_build_query($url_opts) : '');
+
+    // Set header(s)/body opts.
+    $opts['method'] = $method;
+    
+    if (strtoupper($method) == 'POST') {
+      $opts['headers']['Content-Type'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
+      $opts['headers']['accept'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
+      if (!empty($criteria)) {
+        $opts['data'] = _unh_d1_client_build_search_criteria($request, $criteria);
+      }
     }
-  }
-  // $options['headers'] = array('Authorization' => 'Bearer ' . variable_get('api_key'));
 
-  // Determine cache status.
-  $d1_cache = &drupal_static('d1_requests');
-  $key = _unh_d1_client_cache_key($url . http_build_query($opts));
+    // Determine cache status.
+    $d1_cache = &drupal_static('d1_requests');
+    $key = _unh_d1_client_cache_key($url . http_build_query($opts));
 
-  if (isset($d1_cache[$key])) {
-    $ret = $d1_cache[$key];
-    // ddl('GETTING CACHED VALUE!!');
-  }
-  else {
-    $result = drupal_http_request($url, $opts);
-
-    if ($result->code == '200') {
-      $decoded_result = json_decode($result->data, TRUE);
-      $ret = array($result->code, NULL, $decoded_result);
-      $d1_cache[$key] = $ret;
-      // ddl("STORING CACHED VALUE!!");
+    if (isset($d1_cache[$key])) {
+      $ret = $d1_cache[$key];
+      //ddl('GETTING CACHED VALUE!!');
     }
     else {
-      $ret = array($result->code, 'error is: ' . $result->data, NULL);
+      // Make the request!
+      $result = drupal_http_request($url, $opts);
+
+      if ($result->code == '200') {
+        $decoded_result = json_decode($result->data, TRUE);
+        $ret = array($result->code, NULL, $decoded_result);
+        $d1_cache[$key] = $ret;
+        // ddl("STORING CACHED VALUE!!");
+      }
+      else {
+        $ret = array($result->code, 'error is: ' . $result->data, NULL);
+      }
     }
   }
 
   return $ret;
 }
-
-/*
-function unh_d1_client_webservice($request = '', $criteria = array(), $options = array()) {
-
-  $ret = array('500', 'Unable to make webservice request.', null);
-
-  if (!empty($request)) {
-    $url = variable_get('unh_d1_client_webservice_path') . "/" . $request;
-    $url .= (!empty($options) ? '?' . drupal_http_build_query($options) : '');
-
-    $headers = array('Content-Type' => 'application/json');
-    $method = "POST";
-    $body = $criteria;
-
-    $options = array(
-       'headers' => array('Content-Type' => 'application/json', 'Accept' => 'application/json'),
-       'method' => 'POST',
-       'data' => $body
-       );
-
-    $result = drupal_http_request($url, $options);
-
-    // Check for service unavailable and forward to appropriate page. Otherwise, just
-    // return $result
-
-    $error =  (int)$result->code;
-    if (($error >= 500) && ($error <=599)) {
-      drupal_goto('/service-unavailable');
-    }
-
-    if ($result->code == '200') {
-      $decoded_result = json_decode($result->data, true);
-      return array($result->code, null, $decoded_result);
-    } else {
-      return array($result->code, d1client_error($result->data), null);
-    }
-  }
-
-  return $ret;
-}
-*/
 
 /******************************************************************************
  *
@@ -144,15 +108,42 @@ function unh_d1_client_webservice($request = '', $criteria = array(), $options =
  *
  ******************************************************************************/
 
+
+/**
+ * Build the opts that go in the url request (GET/POST)
+ *
+ * Given a request name, returns the basic request structure and with defaults.
+ */
+function _unh_d1_client_build_request_opts($request, $args) {
+  $ret = array();
+  
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
+    $base = UNH_D1_CLIENT_API_REQUESTS[$request];
+
+    $ret = $base['opts']['defaults'];
+    
+    foreach($args as $key=>$arg) {
+      if (in_array($key, $base['opts']['params'])) {
+        $ret[$key] = $arg;
+      }    
+    }
+  }
+  return $ret;
+}
+
 /**
  * Builds the request body for POST requests.
  *
  * Given an array of key=>value, builds a json-encoded argument
  * structure for a webservice request.
  *
+ * The reason behind this is to allow easy building of post requests and to
+ * localize knowledge of that in this one function. (So if it changes we only
+ * have to change it in one place.)
+ *
  * @todo: finish this function!
  */
-function d1_unh_client_build_search_criteria($request, $args) {
+function _unh_d1_client_build_search_criteria($request, $args) {
 
   $ret = json_encode(array());
 
@@ -162,36 +153,12 @@ function d1_unh_client_build_search_criteria($request, $args) {
     // Test to see if we have a valid request.
     if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
       // Get the definition of the request.
-      $def = UNH_D1_CLIENT_API_REQUESTS[$request];
+      $base = UNH_D1_CLIENT_API_REQUESTS[$request];
 
-      // Build an empty request structure.
-      $opts = [
-        $def['requestDetail']['label'] => [
-          $def['searchCriteria']['label'] => [
-            $def['advancedCriteria']['label'] =>[]
-          ],
-        ],
-      ];
-
-      // Build the opts for the request.  These will go into the body of the request.
-      foreach($args as $key=>$arg) {
-        if (in_array($key, $def['base']['params'])) {
-          $opts['$key'] = $arg;
-        } elseif (in_array($key, $def['requestDetail']['params'])) {
-          $opts [$def['requestDetail']['label']] [$key] = $arg;
-        } elseif (in_array($key, $def['searchCriteria']['params'])) {
-          $opts [$def['requestDetail']['label']] [$def['searchCriteria']['label']] [$key] = $arg;
-        } elseif (in_array($key, $def['advancedCriteria']['params'])) {
-          $opts [$def['requestDetail']['label']] [$def['searchCriteria']['label']] [$def['advancedCriteria']['label']] [$key] = $arg;
-        } // else { warn of invalid option }
-      }
-
-      // Check structure for correctness.  I.E., if you have a page construct,
-      // make sure you have both a pageNumber and pageSize (or defaults.)
-
-      // Cleanup the request structure.  If there are parts with no parameters,
-      // delete that part.  If it turns out we have no paramaters at all,
-      // return an empty $opts array()
+      // Build a default request structure.
+      $opts = _unh_d1_client_build_default_request_body($request);
+      // Add in the args for the request.
+      $opts = _unh_d1_client_build_request_body($request, $opts, $args);   
     }
     $ret = json_encode($opts);
   }
@@ -200,13 +167,96 @@ function d1_unh_client_build_search_criteria($request, $args) {
 }
 
 /**
+ * Builds a request body. (POST)
+ *
+ * Given a request name, default request body ($opts) and a set of args,
+ * returns the basic request structure and with defaults.
+ */  
+function _unh_d1_client_build_request_body($request, $opts, $args) {
+  $ret = $opts;
+
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
+    $base = UNH_D1_CLIENT_API_REQUESTS[$request];
+
+    $detail_key = $base['requestDetail']['label'];
+    $criteria_key = $base['requestCriteria']['label'];
+    $advanced_key = $base['advancedCriteria']['label'];
+
+    foreach($args as $key=>$arg) {
+      if (in_array($key, $base['base']['params'])) {
+        $ret['$key'] = $arg;
+      } elseif (in_array($key, $base['requestDetail']['params'])) {
+        $ret[$detail_key][$key] = $arg;
+      } elseif (in_array($key, $base['requestCriteria']['params'])) {
+        $ret[$detail_key][$criteria_key][$key] = $arg;
+      } elseif (in_array($key, $base['advancedCriteria']['params'])) {
+        $opts[$detail_key][$criteria_key][$advanced_key][$key] = $arg;
+      } // else { best effort - invalid options are being ignored }
+    }
+  }
+
+  return $ret;
+}
+
+/**
+ * Builds the default body of a request (POST)
+ *
+ * Given a request name, returns the basic request structure and with defaults.
+ */
+function _unh_d1_client_build_default_request_body($request) {
+  $ret = array();
+  
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
+    $base = UNH_D1_CLIENT_API_REQUESTS[$request];
+
+    // Build a default request body structure.
+    $opts = [
+      $base['requestDetail']['label'] => [
+        $base['requestCriteria']['label'] => [
+          $base['advancedCriteria']['label'] =>[]
+        ],
+      ],
+    ];    
+
+    $detail_key = $base['requestDetail']['label'];
+    $criteria_key = $base['requestCriteria']['label'];
+    $advanced_key = $base['advancedCriteria']['label'];
+
+    $opts = array_merge(
+      $opts,
+      $base['base']['defaults']  
+    );
+
+    $opts[$detail_key] = array_merge(
+      $opts[$detail_key],
+      $base['requestDetail']['defaults']   
+    );
+
+    $opts[$detail_key][$criteria_key] = array_merge(
+      $opts[$detail_key][$criteria_key],
+      $base['requestCriteria']['defaults']   
+    );
+
+    $opts[$detail_key][$criteria_key][$advanced_key] = array_merge(
+      $opts[$detail_key][$criteria_key][$advanced_key],
+      $base['advancedCriteria']['defaults']   
+    );
+
+    $ret = $opts;
+  }
+  
+  return $ret;
+}
+
+/**
  * Implements key calculation for the drupal static cache.
  *
- * Given a fully-qualified url, (http://... or https://... returns a key for
- * the Drupal static has array.
+ * Given a fully-qualified url, (http://... or https://... 
+ * concatenated with any 'stringified' arguments, returns a key for
+ * the Drupal static hash array.
  *
  * The purpose of this is to allow us to cache requests in Drupal static
- * so we don't have to make the same request twice.
+ * so we don't have to make the same request twice per page load.
  */
 function _unh_d1_client_cache_key($str) {
   $ret = '';
@@ -217,3 +267,12 @@ function _unh_d1_client_cache_key($str) {
 }
 
 
+
+
+
+
+
+
+
+
+ 
