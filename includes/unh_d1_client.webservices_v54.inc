@@ -56,7 +56,11 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     }
     else {
       // Make the request!
+      // ddl($url, '$url zzzz');
+      // ddl($opts, '$opts zzzz');
+
       $result = drupal_http_request($url, $opts);
+      // ddl($result, '$result zzz');
 
       if ($result->code == '200') {
         $decoded_result = json_decode($result->data, TRUE);
