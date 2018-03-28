@@ -234,12 +234,7 @@ function unh_d1_client_settings_form_custom_submit($form, &$form_state){
 function unh_d1_client_settings_form_verify_connection($form, &$form_state){
   // Make a really simple request to figure out if the service is running.
   //list($code, $error, $result) = d1client_baseEntities('programAreas');
-  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_API_RQST_PA);
-  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_API_RQST_PA);
-  // @todo - Finish this function.
-  // @todo - Fix the error message in the 'else'.
-
-  $code = '200';
+  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_PROGRAMAREAS);
 
   if ($code == '200') {
     drupal_set_message('Successful connection made!! (Code: ' . $code . ')', 'status', FALSE);
