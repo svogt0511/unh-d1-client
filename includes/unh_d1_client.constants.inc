@@ -44,6 +44,7 @@ define("UNH_D1_CLIENT_WEBSVC_RQST_FMT", "application/json");
 
 // methods go here ;'get', 'post'
 
+
 /**
  * Webservices requests - v5.4/5.5
  *
@@ -59,6 +60,8 @@ define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
  * Hopefully this can be easily expanded to handle more requests.
  *
  * @todo: add programAreas to the d1client settings and set the default appropriately (below)
+ * @todo: report a bug for unh_D1_CLIENT_SEARCHCOURSESECTION broken with overrideMaxResults
+ *    When this is fixed, uncomment it below.
  */
 
 const UNH_D1_CLIENT_API_REQUESTS = [
@@ -66,33 +69,6 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     'opts' => [
       'params' => array('informationLevel', 'locale', '_type'),
       'defaults' => array('_type' => 'json'),
-    ],
-  ],
-  UNH_D1_CLIENT_SEARCHCOURSESECTION => [
-    'opts' => [
-      'params' => array('informationLevel', 'locale', '_type'),
-      'defaults' => array('_type' => 'json'),
-     ],
-    'base' => [
-      'label' => '',
-      'params' => array('informationLevel', 'locale'),
-      'defaults' => array('informationLevel' => 'short'),
-    ],
-    'requestDetail' => [
-      'label' => 'searchCourseSectionProfileRequestDetail',
-      'params' => array('overrideMaxResults', 'pageNumber', 'pageSize'),
-      'defaults' => array('overrideMaxResults' => true),
-    ],
-    'requestCriteria' => [
-      'label'  => 'courseSectionSearchCriteria',
-      'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
-      'defaults' => array(),
-    ],
-    'advancedCriteria' => [
-      'label' => 'advancedCriteria',
-      'params' => array(/*'programAreas', */'customSectionNumber'),
-      // 'defaults' => array('programAreas' => array('programAreaCode' =>  constant(variable_get('d1pdt_program_area')))),
-      'defaults' => array('programAreas' => array('programAreaCode' =>  UNH_D1_CLIENT_PROGRAM_AREA)),
     ],
   ],
   UNH_D1_CLIENT_SEARCHCOURSE => [
@@ -120,6 +96,33 @@ const UNH_D1_CLIENT_API_REQUESTS = [
       'params' => array(/*'programAreas'*/),
       'defaults' => array('programAreas' => array('programAreaCode' => UNH_D1_CLIENT_PROGRAM_AREA)),
     ],  
+  ],
+  UNH_D1_CLIENT_SEARCHCOURSESECTION => [
+    'opts' => [
+      'params' => array('informationLevel', 'locale', '_type'),
+      'defaults' => array('_type' => 'json'),
+     ],
+    'base' => [
+      'label' => '',
+      'params' => array('informationLevel', 'locale'),
+      'defaults' => array('informationLevel' => 'short'),
+    ],
+    'requestDetail' => [
+      'label' => 'searchCourseSectionProfileRequestDetail',
+      'params' => array('overrideMaxResults', 'pageNumber', 'pageSize'),
+      'defaults' => array(/*'overrideMaxResults' => true*/),
+    ],
+    'requestCriteria' => [
+      'label'  => 'courseSectionSearchCriteria',
+      'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
+      'defaults' => array(),
+    ],
+    'advancedCriteria' => [
+      'label' => 'advancedCriteria',
+      'params' => array(/*'programAreas', */'customSectionNumber'),
+      // 'defaults' => array('programAreas' => array('programAreaCode' =>  constant(variable_get('d1pdt_program_area')))),
+      'defaults' => array('programAreas' => array('programAreaCode' =>  UNH_D1_CLIENT_PROGRAM_AREA)),
+    ],
   ]
 ];
 

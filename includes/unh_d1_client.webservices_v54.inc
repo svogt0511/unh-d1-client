@@ -57,6 +57,16 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     else {
       // Make the request!
       $result = drupal_http_request($url, $opts);
+      
+      // Check for service unavailable and forward to appropriate page. Otherwise, just
+      // return $result
+
+      $error =  (int)$result->code;
+      if (($error >= 500) && ($error <=599)) {
+        drupal_goto('/service-unavailable');
+      }
+      
+      // @todo - more error checking?  
 
       if ($result->code == '200') {
         $decoded_result = json_decode($result->data, TRUE);

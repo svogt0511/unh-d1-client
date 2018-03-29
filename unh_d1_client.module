@@ -63,6 +63,8 @@
  */
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.constants.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.webservices_v54.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.data.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.utils.inc';
 
 /**
  * Implements hook_menu().
@@ -97,7 +99,7 @@ function unh_d1_client_menu() {
     'page callback' => 'unh_d1_client_service_unavailable',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
