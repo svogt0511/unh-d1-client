@@ -4,6 +4,8 @@
  * @file
  *
  * Constants.
+ *
+ * @todo: allow overridemaxresults for searchCourseSection
  */
 
 /**
@@ -62,24 +64,30 @@ define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
  * @todo: add programAreas to the d1client settings and set the default appropriately (below)
  * @todo: report a bug for unh_D1_CLIENT_SEARCHCOURSESECTION broken with overrideMaxResults
  *    When this is fixed, uncomment it below.
+ *
+ * Note:
+ *   1) informationLevel of anything other than short will cause an error if
+ *      overrideMaxResults = true.
+ *   2) documentation is wrong: informationLevel and local should go in the url
+ *      not the body of the request.
  */
 
 const UNH_D1_CLIENT_API_REQUESTS = [
   UNH_D1_CLIENT_PROGRAMAREAS => [
     'opts' => [
       'params' => array('informationLevel', 'locale', '_type'),
-      'defaults' => array('_type' => 'json'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
     ],
   ],
   UNH_D1_CLIENT_SEARCHCOURSE => [
     'opts' => [
       'params' => array('informationLevel', 'locale', '_type'),
-      'defaults' => array('_type' => 'json'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
      ],
     'base' => [
       'label' => '',
-      'params' => array('informationLevel', 'locale'),
-      'defaults' => array(/*'informationLevel' => 'short'*/),
+      'params' => array(),
+      'defaults' => array(),
     ],
     'requestDetail' => [
       'label' => 'searchCourseProfileRequestDetail',
@@ -89,27 +97,27 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     'requestCriteria' => [
       'label'  => 'courseSectionSearchCriteria',
       'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
-      'defaults' => array(),
+      'defaults' => array('searchOnlyScheduledCoursesFlag' => true, 'returnOnlyAvailableSectionsFlag' => true),
     ],
     'advancedCriteria' => [
       'label' => 'advancedCriteria',
-      'params' => array(/*'programAreas'*/),
+      'params' => array(/*'programAreas',*/ 'customSectionNumber'),
       'defaults' => array('programAreas' => array('programAreaCode' => UNH_D1_CLIENT_PROGRAM_AREA)),
     ],  
   ],
   UNH_D1_CLIENT_SEARCHCOURSESECTION => [
     'opts' => [
-      'params' => array('informationLevel', 'locale', '_type'),
-      'defaults' => array('_type' => 'json'),
+      'params' => array('informationLevel', 'locale','_type'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
      ],
     'base' => [
       'label' => '',
-      'params' => array('informationLevel', 'locale'),
-      'defaults' => array('informationLevel' => 'short'),
+      'params' => array(),
+      'defaults' => array(),
     ],
     'requestDetail' => [
       'label' => 'searchCourseSectionProfileRequestDetail',
-      'params' => array('overrideMaxResults', 'pageNumber', 'pageSize'),
+      'params' => array(/*'overrideMaxResults',*/ 'pageNumber', 'pageSize'),
       'defaults' => array(/*'overrideMaxResults' => true*/),
     ],
     'requestCriteria' => [
@@ -120,14 +128,20 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     'advancedCriteria' => [
       'label' => 'advancedCriteria',
       'params' => array(/*'programAreas', */'customSectionNumber'),
-      // 'defaults' => array('programAreas' => array('programAreaCode' =>  constant(variable_get('d1pdt_program_area')))),
       'defaults' => array('programAreas' => array('programAreaCode' =>  UNH_D1_CLIENT_PROGRAM_AREA)),
     ],
   ]
 ];
 
-
-
+/**
+ * SECTIONS: valid 'sectionAvailabilityCode' values.
+ */
+ 
+define("UNH_D1_CLIENT_SECTION_AVAILABLE", "available");
+define("UNH_D1_CLIENT_SECTION_NO_LONGER_AVAILABLE", "no_longer_available");
+define("UNH_D1_CLIENT_SECTION_WAITLIST_AVAILABLE", "waitlist_available");
+define("UNH_D1_CLIENT_SECTION_FULL", "full");
+define("UNH_D1_CLIENT_SECTION_FUTURE_OFFERING", "future_offering");
 
 
 

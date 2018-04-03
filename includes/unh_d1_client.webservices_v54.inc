@@ -27,23 +27,28 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     NULL,
   );
 
-  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
-    
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {    
+    // Special check.  If we have informationLevel more than short, overrideMaxResults must be false.
+    if (array_key_exists('informationLevel', $options) && (strcasecmp($options['informationLevel'], 'short') !== 0)) {
+      //$criteria['overrideMaxResults'] = false;
+      if (array_key_exists('overrideMaxResults', $options)) {
+        unset($options['overrideMaxResults']);
+      }
+    }
+
     $url_opts = _unh_d1_client_build_request_opts($request, $options);
 
     // Set url.
     $url = variable_get('unh_d1_client_webservice_path') . (!empty($request) ? '/' . $request : '') . (!empty($baseEntity) ? '/' . $baseEntity : '');
     $url .= (!empty($url_opts) ? '?' . drupal_http_build_query($url_opts) : '');
-
+    
     // Set header(s)/body opts.
     $opts['method'] = $method;
     
     if (strtoupper($method) == 'POST') {
       $opts['headers']['Content-Type'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
       $opts['headers']['accept'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
-      if (!empty($criteria)) {
-        $opts['data'] = _unh_d1_client_build_search_criteria($request, $criteria);
-      }
+      $opts['data'] = _unh_d1_client_build_search_criteria($request, $criteria);
     }
 
     // Determine cache status.
@@ -57,11 +62,11 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     else {
       // Make the request!
       $result = drupal_http_request($url, $opts);
-      
+
       // Check for service unavailable and forward to appropriate page. Otherwise, just
       // return $result
 
-      $error =  (int)$result->code;
+      $error = (int)$result->code;
       if (($error >= 500) && ($error <=599)) {
         drupal_goto('/service-unavailable');
       }
@@ -118,7 +123,6 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
  *
  ******************************************************************************/
 
-
 /**
  * Build the opts that go in the url request (GET/POST)
  *
@@ -154,23 +158,22 @@ function _unh_d1_client_build_request_opts($request, $args) {
  * @todo: finish this function!
  */
 function _unh_d1_client_build_search_criteria($request, $args) {
-
   $ret = json_encode(array());
+  
+  // Test to see if we have a valid request.
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
+    // Get the definition of the request.
+    $base = UNH_D1_CLIENT_API_REQUESTS[$request];
+    
+    // Build a default request structure.
+    $opts = _unh_d1_client_build_default_request_body($request);
 
-  if (!empty($args)) {
-    $opts = array();
-
-    // Test to see if we have a valid request.
-    if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
-      // Get the definition of the request.
-      $base = UNH_D1_CLIENT_API_REQUESTS[$request];
-
-      // Build a default request structure.
-      $opts = _unh_d1_client_build_default_request_body($request);
+    if (!empty($args)) {
       // Add in the args for the request.
-      $opts = _unh_d1_client_build_request_body($request, $opts, $args);   
+      $opts = _unh_d1_client_build_request_body($request, $opts, $args);     
     }
-    $ret = json_encode($opts);
+    
+    $ret = json_encode($opts);  
   }
 
   return $ret;
@@ -194,7 +197,7 @@ function _unh_d1_client_build_request_body($request, $opts, $args) {
 
     foreach($args as $key=>$arg) {
       if (in_array($key, $base['base']['params'])) {
-        $ret['$key'] = $arg;
+        $ret[$key] = $arg;
       } elseif (in_array($key, $base['requestDetail']['params'])) {
         $ret[$detail_key][$key] = $arg;
       } elseif (in_array($key, $base['requestCriteria']['params'])) {
@@ -204,7 +207,7 @@ function _unh_d1_client_build_request_body($request, $opts, $args) {
       } // else { best effort - invalid options are being ignored }
     }
   }
-
+  
   return $ret;
 }
 
