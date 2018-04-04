@@ -27,15 +27,7 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     NULL,
   );
 
-  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {    
-    // Special check.  If we have informationLevel more than short, overrideMaxResults must be false.
-    if (array_key_exists('informationLevel', $options) && (strcasecmp($options['informationLevel'], 'short') !== 0)) {
-      //$criteria['overrideMaxResults'] = false;
-      if (array_key_exists('overrideMaxResults', $options)) {
-        unset($options['overrideMaxResults']);
-      }
-    }
-
+  if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
     $url_opts = _unh_d1_client_build_request_opts($request, $options);
 
     // Set url.
@@ -48,7 +40,8 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     if (strtoupper($method) == 'POST') {
       $opts['headers']['Content-Type'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
       $opts['headers']['accept'] = UNH_D1_CLIENT_WEBSVC_RQST_FMT;
-      $opts['data'] = _unh_d1_client_build_search_criteria($request, $criteria);
+      $body_opts = _unh_d1_client_build_search_criteria($request, $criteria, $options);
+      $opts['data'] = json_encode($body_opts);
     }
 
     // Determine cache status.
@@ -157,8 +150,8 @@ function _unh_d1_client_build_request_opts($request, $args) {
  *
  * @todo: finish this function!
  */
-function _unh_d1_client_build_search_criteria($request, $args) {
-  $ret = json_encode(array());
+function _unh_d1_client_build_search_criteria($request, $args, $options) {
+  $ret = array();
   
   // Test to see if we have a valid request.
   if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
@@ -170,10 +163,10 @@ function _unh_d1_client_build_search_criteria($request, $args) {
 
     if (!empty($args)) {
       // Add in the args for the request.
-      $opts = _unh_d1_client_build_request_body($request, $opts, $args);     
+      $opts = _unh_d1_client_build_request_body($request, $opts, $args, $options);
     }
     
-    $ret = json_encode($opts);  
+    $ret = $opts;  
   }
 
   return $ret;
@@ -185,7 +178,7 @@ function _unh_d1_client_build_search_criteria($request, $args) {
  * Given a request name, default request body ($opts) and a set of args,
  * returns the basic request structure and with defaults.
  */  
-function _unh_d1_client_build_request_body($request, $opts, $args) {
+function _unh_d1_client_build_request_body($request, $opts, $args, $options) {
   $ret = $opts;
 
   if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
@@ -197,17 +190,46 @@ function _unh_d1_client_build_request_body($request, $opts, $args) {
 
     foreach($args as $key=>$arg) {
       if (in_array($key, $base['base']['params'])) {
-        $ret[$key] = $arg;
+        if (array_key_exists($key, $base['base']['builder'])) {
+          $arg = $base['base']['builder'][$key]($arg);
+        }
+        if (!empty($arg)) {
+          $ret[$key] = $arg;
+        }
       } elseif (in_array($key, $base['requestDetail']['params'])) {
-        $ret[$detail_key][$key] = $arg;
+        if (array_key_exists($key, $base['requestDetail']['builder'])) {
+          $arg = $base['requestDetail']['builder'][$key]($arg);
+        }
+        if (!empty($arg)) {
+          $ret[$detail_key][$key] = $arg;
+        }
       } elseif (in_array($key, $base['requestCriteria']['params'])) {
-        $ret[$detail_key][$criteria_key][$key] = $arg;
+        if (array_key_exists($key, $base['requestCriteria']['builder'])) {
+          $arg = $base['requestCriteria']['builder'][$key]($arg);
+        }
+        if (!empty($arg)) {
+          $ret[$detail_key][$criteria_key][$key] = $arg;
+        }
       } elseif (in_array($key, $base['advancedCriteria']['params'])) {
-        $opts[$detail_key][$criteria_key][$advanced_key][$key] = $arg;
+        if (array_key_exists($key, $base['advancedCriteria']['builder'])) {
+        $function = $base['advancedCriteria']['builder'][$key];
+          $arg = $base['advancedCriteria']['builder'][$key]($arg);
+        }
+        if (!empty($arg)) {
+          $ret[$detail_key][$criteria_key][$advanced_key][$key] = $arg;
+        }
       } // else { best effort - invalid options are being ignored }
     }
   }
   
+  // Special check - delete overrideMaxResults if other than short is specified
+  // for informationLevel
+  if (array_key_exists('informationLevel', $options) && (strcasecmp('short', $options['informationLevel']) !== 0)) {
+    if (array_key_exists('overrideMaxResults', $ret[$detail_key])) {
+      unset($ret[$detail_key]['overrideMaxResults']);
+    }
+  }
+    
   return $ret;
 }
 
@@ -278,6 +300,30 @@ function _unh_d1_client_cache_key($str) {
 
   return $ret;
 }
+
+
+/**
+ * Builds the programAreas part of the POST body. (BUG - D1)
+ *
+ * Returns keyed array with the last programAreaCode specified. Uses the last
+ * programAreaCode given.
+ *
+ * Should be able to just use an indexed array, but if a list of programAreaCodes
+ * is presented as an indexed array, D1 ignores them.
+ *
+ * This is kind of funky because of a bug in the API (json).
+ * We only use the last programArea because there is no way we can express
+ * multiple programAreas in their json interpretation of the request.
+ */
+function _unh_d1_client_build_programAreas($programAreas = array()) {
+  $ret = array();
+
+  foreach($programAreas as $programArea) {
+    $ret['programAreaCode'] = $programArea;
+  }
+  return $ret;
+}
+
 
 
 
