@@ -7,6 +7,11 @@
  *
  * @todo: allow overridemaxresults for searchCourseSection
  */
+ 
+/**
+ * Version Info.
+ */
+define("UNH_D1_CLIENT_VERSION_7X00_alpha0", "7.x.00.0.alpha.0");
 
 /**
  * API version.
@@ -36,7 +41,6 @@ define("UNH_D1_CLIENT_DOMAIN_BE", "unhsv.destinysolutions.com");
 define("UNH_D1_CLIENT_DOMAIN_FE", "unhpv.destinysolutions.com");
 define("UNH_D1_CLIENT_DOMAIN_PUBLIC", "learnforlife.unh.edu");
 define("UNH_D1_CLIENT_WEBSERVICE_PATH", "http://unhws.destinysolutions.com/webservice/PublicViewREST");
-define("UNH_D1_CLIENT_PROGRAM_AREA", variable_get('d1pdt_program_area')); 
 
 /**
  * Webservice constants.
@@ -52,6 +56,7 @@ define("UNH_D1_CLIENT_WEBSVC_RQST_FMT", "application/json");
  *
  * Hopefully this can be easily expanded to handle more requests.
  */
+define("UNH_D1_CLIENT_BASEENTITIES", "baseEntities");
 define("UNH_D1_CLIENT_PROGRAMAREAS", "programAreas");
 define("UNH_D1_CLIENT_SEARCHCOURSE", "searchCourse");
 define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
@@ -73,6 +78,12 @@ define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
  */
 
 const UNH_D1_CLIENT_API_REQUESTS = [
+  UNH_D1_CLIENT_BASEENTITIES => [
+    'opts' => [
+      'params' => array('informationLevel', 'locale', '_type'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
+    ],
+  ],
   UNH_D1_CLIENT_PROGRAMAREAS => [
     'opts' => [
       'params' => array('informationLevel', 'locale', '_type'),
@@ -88,21 +99,25 @@ const UNH_D1_CLIENT_API_REQUESTS = [
       'label' => '',
       'params' => array(),
       'defaults' => array(),
+      'builder' => array(),
     ],
     'requestDetail' => [
       'label' => 'searchCourseProfileRequestDetail',
       'params' => array('overrideMaxResults', 'pageNumber', 'pageSize'),
       'defaults' => array('overrideMaxResults' => true),
+      'builder' => array(),
     ],
     'requestCriteria' => [
       'label'  => 'courseSectionSearchCriteria',
       'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
       'defaults' => array('searchOnlyScheduledCoursesFlag' => true, 'returnOnlyAvailableSectionsFlag' => true),
+      'builder' => array(),
     ],
     'advancedCriteria' => [
       'label' => 'advancedCriteria',
-      'params' => array(/*'programAreas',*/ 'customSectionNumber'),
-      'defaults' => array('programAreas' => array('programAreaCode' => UNH_D1_CLIENT_PROGRAM_AREA)),
+      'params' => array('programAreas'),
+      'defaults' => array(),
+      'builder' => array('programAreas' => '_unh_d1_client_build_programAreas'),
     ],  
   ],
   UNH_D1_CLIENT_SEARCHCOURSESECTION => [
@@ -114,21 +129,25 @@ const UNH_D1_CLIENT_API_REQUESTS = [
       'label' => '',
       'params' => array(),
       'defaults' => array(),
+      'builder' => array(),
     ],
     'requestDetail' => [
       'label' => 'searchCourseSectionProfileRequestDetail',
       'params' => array(/*'overrideMaxResults',*/ 'pageNumber', 'pageSize'),
       'defaults' => array(/*'overrideMaxResults' => true*/),
+      'builder' => array(),
     ],
     'requestCriteria' => [
       'label'  => 'courseSectionSearchCriteria',
       'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
       'defaults' => array(),
+      'builder' => array(),
     ],
     'advancedCriteria' => [
       'label' => 'advancedCriteria',
-      'params' => array(/*'programAreas', */'customSectionNumber'),
-      'defaults' => array('programAreas' => array('programAreaCode' =>  UNH_D1_CLIENT_PROGRAM_AREA)),
+      'params' => array('programAreas', 'customSectionNumber'),
+      'defaults' => array(),
+      'builder' => array('programAreas' => '_unh_d1_client_build_programAreas'),
     ],
   ]
 ];

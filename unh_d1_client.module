@@ -82,7 +82,7 @@ function unh_d1_client_menu() {
     'file path' => drupal_get_path('module', 'system'),
   );
 
-  // Admin config page for d1client module.
+  // Admin config page for d1_client module.
   $items['admin/config/unh-d1/unh-d1-client-settings'] = array(
     'title' => 'UNH D1: Client Settings',
     'description' => 'Configuration UNH DestinyOne API web client.',

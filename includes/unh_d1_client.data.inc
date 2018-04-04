@@ -17,8 +17,6 @@
  *
  * Calls to extract data of interest from the API.
  *
- * All calls are made relative to the configured program area.
- *
  ******************************************************************************/
 
 /**
@@ -29,7 +27,7 @@
  *
  * Searches all courses in the configured program area.
  */
-function unh_d1_client_searchCourse_keyword($keyword = '', $information_level = 'short') {
+function unh_d1_client_searchCourse_keyword($keyword = '', $programAreas = array(), $information_level = 'short') {
   $ret = array();
   
   if (!empty($keyword)) {
@@ -37,14 +35,16 @@ function unh_d1_client_searchCourse_keyword($keyword = '', $information_level = 
       UNH_D1_CLIENT_SEARCHCOURSE, 
       '', 
       array('informationLevel'  =>  $information_level), 
-      array('keyword' => $keyword), 
+      array('keyword' => $keyword, 'programAreas' => $programAreas), 
       'POST'
     );
     
     // There could be some checking here, but mostly, best effort.
     if ($code == '200') {
-      $courses = $result['searchCourseResult']['courseProfiles']['courseProfile'];
-      $ret = _unh_d1_client_idxed_array($courses);
+      if (!empty($result['searchCourseResult']['courseProfiles'])) {
+        $courses = $result['searchCourseResult']['courseProfiles']['courseProfile'];
+        $ret = _unh_d1_client_idxed_array($courses);
+      }
     }
   }
 
@@ -58,7 +58,7 @@ function unh_d1_client_searchCourse_keyword($keyword = '', $information_level = 
  * Returns a course if there is one with the given course code.  Otherwise returns NULL.
  */
 function unh_d1_client_searchCourse_courseCode($course_code = '', $information_level = 'short') {
-  $ret = NULL;
+  $ret = array();
   
   if (!empty($course_code)) {
     list($code, $error, $result) = unh_d1_client_request(
@@ -72,7 +72,7 @@ function unh_d1_client_searchCourse_courseCode($course_code = '', $information_l
     // There could be some checking here, but mostly, best effort.
     if ($code == '200') {
       $course = $result['searchCourseResult']['courseProfiles']['courseProfile'];
-      $ret = $course;
+      $ret = _unh_d1_client_idxed_array($courses);
     }
   }
 
@@ -80,15 +80,16 @@ function unh_d1_client_searchCourse_courseCode($course_code = '', $information_l
 }
 
 /**
- * Implements a more flexible course search.
+ * Gets specified groups of courses. 
  *
- * Returns a 'short' list of all courses withing the configured program area.
+ * Returns a list of all courses within the configured program area.
+ * Default - returns all courses in all program areas.
  */
-function unh_d1_client_searchCourse($information_level = 'short') {
-  $ret = NULL;
+function unh_d1_client_getCourses($programAreas = array(), $information_level = 'short') {
+  $ret = array();
   
   $options = array('informationLevel'  =>  $information_level);
-  $criteria = array();
+  $criteria = array('programAreas' => $programAreas);
   list($code, $error, $result) = unh_d1_client_request(
     UNH_D1_CLIENT_SEARCHCOURSE, 
     '', 
@@ -100,7 +101,7 @@ function unh_d1_client_searchCourse($information_level = 'short') {
   // There could be some checking here, but mostly, best effort.
   if ($code == '200') {
     $courses = $result['searchCourseResult']['courseProfiles']['courseProfile'];
-    $ret = $courses;
+    $ret = _unh_d1_client_idxed_array($courses);
   }
 
   return $ret;
@@ -109,7 +110,7 @@ function unh_d1_client_searchCourse($information_level = 'short') {
 /**
  * Gets the sections belonging to a course
  *
- * Returns an array of courses.  Searches all courses in the configured program area.
+ * Returns an array of courses.
  */
 function unh_d1_client_searchCourseSections($course_code = '', $custom_section_number = '', $information_level = 'short') {
   $ret = array();
@@ -139,11 +140,65 @@ function unh_d1_client_searchCourseSections($course_code = '', $custom_section_n
 }
 
 
+/**
+ * Returns a list of programAreas.
+ *
+ * Gets the list through the programAreas call.
+ */
+function unh_d1_client_getprogramAreas($information_level = 'short') {
+  $ret = array();
+  
+  $options = array('informationLevel'  =>  $information_level);
+  $criteria = array();
+  list($code, $error, $result) = unh_d1_client_request(
+    UNH_D1_CLIENT_PROGRAMAREAS, 
+    '', 
+    $options, 
+    $criteria, 
+    'GET'
+  );
+  
+  // There could be some checking here, but mostly, best effort.
+  if ($code == '200') {
+    $programAreas = $result['programArea'];
+    $ret = _unh_d1_client_idxed_array($programAreas);
+  }
+
+  return $ret;
+}
+
+
+/**
+ * Returns a list of programAreas (v1). 
+ *
+ * Gets the list through the baseEntities call.
+ */
+function unh_d1_client_getprogramAreasV1($information_level = 'short') {
+  $ret = array();
+  
+  $options = array('informationLevel'  =>  $information_level);
+  $criteria = array();
+  list($code, $error, $result) = unh_d1_client_request(
+    UNH_D1_CLIENT_BASEENTITIES, 
+    'programAreas', 
+    $options, 
+    $criteria, 
+    'GET'
+  );
+  
+  // There could be some checking here, but mostly, best effort.
+  if ($code == '200') {
+    $programAreas = $result['baseEntity'];
+    $ret = _unh_d1_client_idxed_array($programAreas);
+  }
+
+  return $ret;
+}
+
+
 /******************************************************************************
  *
- * Calls to extract statuses of various data objects returned by the API.
- *
- * All calls are made relative to the configured program area.
+ * Calls to determine STATUSES of various data objects returned by the API.
  *
  ******************************************************************************/
 
@@ -205,7 +260,7 @@ function unh_d1_client_sectionIsAvailable($section = NULL) {
 
 /******************************************************************************
  *
- * Calls to extract data from course objects obtained from the API.
+ * Calls to extract data from COURSE objects obtained from the API.
  *
  ******************************************************************************/
  
@@ -241,7 +296,7 @@ function unh_d1_client_getcourseNumber($course = NULL) {
 
 /******************************************************************************
  *
- * Calls to extract data from section objects obtained from the API.
+ * Calls to extract data from SECTION objects obtained from the API.
  *
  ******************************************************************************/
 
