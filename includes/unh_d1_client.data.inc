@@ -57,22 +57,23 @@ function unh_d1_client_searchCourse_keyword($keyword = '', $programAreas = array
  *
  * Returns a course if there is one with the given course code.  Otherwise returns NULL.
  */
-function unh_d1_client_searchCourse_courseCode($course_code = '', $information_level = 'short') {
-  $ret = array();
+function unh_d1_client_searchCourse_courseCode($course_code = '', $programAreas = array(), $information_level = 'short') {
+  $ret = NULL;
   
   if (!empty($course_code)) {
     list($code, $error, $result) = unh_d1_client_request(
       UNH_D1_CLIENT_SEARCHCOURSE, 
       '', 
       array('informationLevel'  =>  $information_level), 
-      array('courseCode' => $course_code), 
+      array('courseCode' => $course_code, 'programAreas' => $programAreas), 
       'POST'
     );
     
     // There could be some checking here, but mostly, best effort.
     if ($code == '200') {
       $course = $result['searchCourseResult']['courseProfiles']['courseProfile'];
-      $ret = _unh_d1_client_idxed_array($courses);
+      // Returning at most 1 course. (Don't use _unh_d1_client_idxed_array.)
+      $ret = $course;
     }
   }
 
@@ -80,12 +81,15 @@ function unh_d1_client_searchCourse_courseCode($course_code = '', $information_l
 }
 
 /**
- * Gets specified groups of courses. 
+ * Gets specified groups of courses in the given program areas. 
  *
  * Returns a list of all courses within the configured program area.
  * Default - returns all courses in all program areas.
+ *
+ * If no criteria are specified - no courses are returned.  However,
+ * if given a list of all program areas, will return all courses.
  */
-function unh_d1_client_getCourses($programAreas = array(), $information_level = 'short') {
+function unh_d1_client_searchCourse_programAreas($programAreas = array(), $information_level = 'short') {
   $ret = array();
   
   $options = array('informationLevel'  =>  $information_level);
@@ -97,7 +101,6 @@ function unh_d1_client_getCourses($programAreas = array(), $information_level = 
     $criteria, 
     'POST'
   );
-  
   // There could be some checking here, but mostly, best effort.
   if ($code == '200') {
     $courses = $result['searchCourseResult']['courseProfiles']['courseProfile'];

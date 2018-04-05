@@ -55,7 +55,9 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
     else {
       // Make the request!
       $result = drupal_http_request($url, $opts);
-
+      // ddl($result, '$result - webservices');
+      // ddl($url, '$url - webservices');
+      // ddl($opts, '$opts - webservices');
       // Check for service unavailable and forward to appropriate page. Otherwise, just
       // return $result
 
