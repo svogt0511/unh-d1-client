@@ -115,12 +115,12 @@ function unh_d1_client_searchCourse_programAreas($programAreas = array(), $infor
  *
  * Returns an array of courses.
  */
-function unh_d1_client_searchCourseSections($course_code = '', $custom_section_number = '', $information_level = 'short') {
+function unh_d1_client_searchCourseSections($course_code = '', $custom_section_number = '', $programAreas = array(), $information_level = 'short') {
   $ret = array();
   
   if (!empty($course_code)) {
     $options = array('informationLevel'  =>  $information_level);
-    $criteria = array('courseCode' => $course_code);
+    $criteria = array('courseCode' => $course_code, 'programAreas' => $programAreas);
     if (!empty($custom_section_number)) {
       $criteria['customSectionNumber'] = $custom_section_number;
     }
