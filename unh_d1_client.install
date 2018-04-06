@@ -16,7 +16,6 @@ require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_clie
 * Implements hook_install().
 */
 function unh_d1_client_install() {
-  variable_set('unh_d1_client_program_area', '');
   variable_set('unh_d1_client_api_release', UNH_D1_CLIENT_API_RELEASE);
   variable_set('unh_d1_client_cache_error_time', UNH_D1_CLIENT_CACHE_ERROR_TIME);
   variable_set('unh_d1_client_cache_time', UNH_D1_CLIENT_CACHE_TIME);
