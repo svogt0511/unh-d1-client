@@ -34,7 +34,7 @@ function unh_d1_client_uninstall() {
  global $conf;
  foreach (array_keys($conf) as $key) {
    // Find variables that have the module prefix
-   if (strpos($key, 'd1client_') === 0) {
+   if (strpos($key, 'unh_d1_client_') === 0) {
      variable_del($key);
    }
  }

@@ -63,6 +63,8 @@
  */
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.constants.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.webservices_v54.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.data.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.utils.inc';
 
 /**
  * Implements hook_menu().
@@ -80,7 +82,7 @@ function unh_d1_client_menu() {
     'file path' => drupal_get_path('module', 'system'),
   );
 
-  // Admin config page for d1client module.
+  // Admin config page for d1_client module.
   $items['admin/config/unh-d1/unh-d1-client-settings'] = array(
     'title' => 'UNH D1: Client Settings',
     'description' => 'Configuration UNH DestinyOne API web client.',
@@ -97,7 +99,7 @@ function unh_d1_client_menu() {
     'page callback' => 'unh_d1_client_service_unavailable',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -234,13 +236,7 @@ function unh_d1_client_settings_form_custom_submit($form, &$form_state){
 function unh_d1_client_settings_form_verify_connection($form, &$form_state){
   // Make a really simple request to figure out if the service is running.
   //list($code, $error, $result) = d1client_baseEntities('programAreas');
-  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_API_RQST_PA);
-  ddl($code, '$code');
-  ddl($error, '$error');
-  ddl($result, '$result');
-  // @todo - Finish this function.
-  // @todo - Fix the error message in the 'else'.
-  $code = '200';
+  list($code, $error, $result) = unh_d1_client_request(UNH_D1_CLIENT_PROGRAMAREAS);
 
   if ($code == '200') {
     drupal_set_message('Successful connection made!! (Code: ' . $code . ')', 'status', FALSE);
