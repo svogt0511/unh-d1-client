@@ -161,7 +161,12 @@ define("UNH_D1_CLIENT_SECTION_NO_LONGER_AVAILABLE", "no_longer_available");
 define("UNH_D1_CLIENT_SECTION_WAITLIST_AVAILABLE", "waitlist_available");
 define("UNH_D1_CLIENT_SECTION_FULL", "full");
 define("UNH_D1_CLIENT_SECTION_FUTURE_OFFERING", "future_offering");
+define("UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED", "enrollment_closed");
 
 
 
+/**
+ * MISC CONSTANTS
+ */
+ define('UNH_D1_CLIENT_TZ', 'America/New_York');
 
