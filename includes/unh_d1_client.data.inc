@@ -423,7 +423,7 @@ function unh_d1_client_getcourseNumber($course = NULL) {
  * Given a section, returns the 'sectionTitle'.
  * 
  */
-function unh_d1_client_getsectionTitle($section = NULL) {
+function unh_d1_client_getsectionTitle($section = '') {
   $ret = '';
   
   if (!empty($section) && array_key_exists('sectionTitle', $section)) {
@@ -438,7 +438,7 @@ function unh_d1_client_getsectionTitle($section = NULL) {
  * Given a section, returns the 'customSectionNumber'.
  * 
  */
-function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
+function unh_d1_client_getsectionCustomSectionNumber($section = '') {
   $ret = '';
   
   if (!empty($section) && array_key_exists('customSectionNumber', $section)) {
@@ -453,7 +453,7 @@ function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
  * Given a section, returns the 'sectionAvailabilityCode'.
  * 
  */
-function unh_d1_client_getsectionAvailabilityCode($section = NULL) {
+function unh_d1_client_getsectionAvailabilityCode($section = '') {
   $ret = '';
   
   if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
@@ -468,7 +468,7 @@ function unh_d1_client_getsectionAvailabilityCode($section = NULL) {
  * Given a section, returns the 'associatedTerm' name.
  * 
  */
-function unh_d1_client_getsectionSemester($section = NULL) {
+function unh_d1_client_getsectionSemester($section = '') {
   $ret = '';
   
   if (!empty($section) && array_key_exists('associatedTerm', $section)) {
@@ -484,12 +484,11 @@ function unh_d1_client_getsectionSemester($section = NULL) {
  * 
  */
 function unh_d1_client_getsectionObjectId($section = NULL) {
-  $ret = '';
+  $ret = null;
   
   if (!empty($section) && array_key_exists('objectId', $section)) {
     $ret = $section['objectId'];
   }
-  ddl ($ret, '$ret - section url');
   return $ret;
 }
 
@@ -500,9 +499,12 @@ function unh_d1_client_getsectionObjectId($section = NULL) {
  * Returns a DateTime object.
  *
  */
-function unh_d1_client_getSectionEnrollmentBeginDate($sectionProfile) {
-  $dt = new DateTime($section['pvEnrollmentBeginDate']);
-  return $dt;
+function unh_d1_client_getSectionPvEnrollmentBeginDate($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('pvEnrollmentBeginDate', $section)) {
+    $ret = new DateTime($section['pvEnrollmentBeginDate']);
+  }
+  return $ret;
 }
 
 /**
@@ -512,9 +514,12 @@ function unh_d1_client_getSectionEnrollmentBeginDate($sectionProfile) {
  * Returns a DateTime object.
  *
  */
-function unh_d1_client_getSectionEnrollmentEndDate($section) {
-  $dt = new DateTime($section['pvEnrollmentEndDate']);
-  return $dt;
+function unh_d1_client_getSectionPvEnrollmentEndDate($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('pvEnrollmentEndDate', $section)) {
+    $ret = new DateTime($section['pvEnrollmentEndDate']);
+  }
+  return $ret;
 }
 
 /**
@@ -524,9 +529,12 @@ function unh_d1_client_getSectionEnrollmentEndDate($section) {
  * Returns a DateTime object.
  *
  */
-function unh_d1_client_getSectionPvAvailaibilityBeginDate($section) {
-  $dt = new DateTime($section['pvAvailabilityBeginDate']);
-  return $dt;
+function unh_d1_client_getSectionPvAvailaibilityBeginDate($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('pvAvailabilityBeginDate', $section)) {
+    $ret = new DateTime($section['pvAvailabilityBeginDate']);
+  }
+  return $ret;
 }
 
 /**
@@ -536,11 +544,92 @@ function unh_d1_client_getSectionPvAvailaibilityBeginDate($section) {
  * Returns a DateTime object.
  *
  */
-function unh_d1_client_getSectionPvAvailabilityEndDate($section) {
-  $dt = new DateTime($section['pvAvailabilityEndDate']);
-  return $dt;
+function unh_d1_client_getSectionPvAvailabilityEndDate($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('pvAvailabilityEndDate', $section)) {
+    $ret = new DateTime($section['pvAvailabilityEndDate']);
+  }
+  return $ret;
 }
 
+/**
+ *
+ * Given a section, returns an array of 'sectionSchedules'.
+ *
+ */
+function unh_d1_client_getSectionSchedules($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('sectionSchedules', $section)) {
+    $ret = _unh_d1_client_idxed_array($section['sectionSchedules']['sectionSchedule']);
+  }
+  return $ret;
+}
+
+/******************************************************************************
+ *
+ * Calls to extract data from SECTION SCHEDULE objects obtained from the API.
+ *
+ ******************************************************************************/
+
+/**
+ *
+ * Given a sectionSchedule, returns a the start date.
+ *
+ * Returns a DateTime object.
+ *
+ */
+function unh_d1_client_getSectionScheduleStartDate($sectionSchedule = NULL) {
+  $ret = NULL;
+  if (!empty($sectionSchedule) && array_key_exists('startDate', $sectionSchedule) && !empty($sectionSchedule['startDate'])) {
+    $ret = new DateTime($sectionSchedule['startDate']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given a sectionSchedule, returns the end date.
+ *
+ * Returns a DateTime object.
+ *
+ */
+function unh_d1_client_getSectionScheduleEndDate($sectionSchedule = NULL) {
+  $ret = NULL;
+  if (!empty($sectionSchedule) && array_key_exists('endDate', $sectionSchedule) && !empty($sectionSchedule['endDate'])) {
+    $ret = new DateTime($sectionSchedule['endDate']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given a sectionSchedule, returns a the start time.
+ *
+ * Returns a DateTime object.
+ *
+ */
+function unh_d1_client_getSectionScheduleStartTime($sectionSchedule = NULL) {
+  $ret = NULL;
+  if (!empty($sectionSchedule) && array_key_exists('startTimeString', $sectionSchedule) && !empty($sectionSchedule['startTimeString'])) {
+    $ret = new DateTime($sectionSchedule['startTimeString']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given a sectionSchedule, returns the end time.
+ *
+ * Returns a DateTime object.
+ *
+ */
+function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
+  $ret = NULL;
+  if (!empty($sectionSchedule) && array_key_exists('endTimeString', $sectionSchedule) && !empty($sectionSchedule['endTimeString'])) {
+    $ret = new DateTime($sectionSchedule['endTimeString']);
+  }
+  return $ret;
+}
 
 /******************************************************************************
  *
@@ -570,12 +659,6 @@ function unh_d1_client_get_notify_me_url($courseObjID, $sectionNumber) {
     '&sectionNumber=' . $sectionNumber;
 }
 */
- 
- 
- 
- 
- 
- 
  
  
 // card_header - section status to display in card header: waitlist, ???
