@@ -66,8 +66,6 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
         drupal_goto('/service-unavailable');
       }
       
-      // @todo - more error checking?  
-
       if ($result->code == '200') {
         $decoded_result = json_decode($result->data, TRUE);
         $ret = array($result->code, NULL, $decoded_result);
