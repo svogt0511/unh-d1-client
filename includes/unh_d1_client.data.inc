@@ -71,8 +71,6 @@ function unh_d1_client_searchCourse_courseCode($course_code = '', $programAreas 
 
     // There could be some checking here, but mostly, best effort.
     if ($code == '200') {
-    ddl($result, '$result - EEEEEE');
-    ddl ($code, '$code - EEEEE');
       $course = $result['searchCourseResult']['courseProfiles']['courseProfile'];
       // Returning at most 1 course. (Don't use _unh_d1_client_idxed_array.)
       $ret = $course;
@@ -256,6 +254,8 @@ function unh_d1_client_getprogramAreasV1($information_level = 'short') {
  * 
  */
 function unh_d1_client_courseIsAvailable($course = NULL) {
+  // for testing with 5.4 @todo
+  return TRUE;
   $ret = FALSE;
   
   if (!empty($course) && array_key_exists('courseNumber', $course)) {
@@ -282,7 +282,8 @@ function unh_d1_client_courseIsAvailable($course = NULL) {
  * @todo: set to return true/false depending on if API version is 5.4 or 5.5
  */
 function unh_d1_client_sectionIsAvailable($section = NULL) {
-  //return TRUE;
+  // for testing with 5.4 @todo
+  return TRUE;
 
   $ret = FALSE;
   
@@ -323,7 +324,6 @@ function unh_d1_client_sectionIsWaitlisted($section = NULL) {
       $ret = TRUE;
     }
   }
-  ddl($ret, '$ret - waitlist status');
   return $ret;
 }
 
@@ -611,7 +611,9 @@ function unh_d1_client_getSectionScheduleEndDate($sectionSchedule = NULL) {
 function unh_d1_client_getSectionScheduleStartTime($sectionSchedule = NULL) {
   $ret = NULL;
   if (!empty($sectionSchedule) && array_key_exists('startTimeString', $sectionSchedule) && !empty($sectionSchedule['startTimeString'])) {
-    $ret = new DateTime($sectionSchedule['startTimeString']);
+    // $ret = new DateTime($sectionSchedule['startTimeString']);
+    $time_str = _unh_d1_client_cv_time_string_sectionSchedule($sectionSchedule['startTimeString']);
+    $ret = DateTime::createFromFormat(UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT, $time_str);
   }
   return $ret;
 }
@@ -626,7 +628,9 @@ function unh_d1_client_getSectionScheduleStartTime($sectionSchedule = NULL) {
 function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
   $ret = NULL;
   if (!empty($sectionSchedule) && array_key_exists('endTimeString', $sectionSchedule) && !empty($sectionSchedule['endTimeString'])) {
-    $ret = new DateTime($sectionSchedule['endTimeString']);
+    // $ret = new DateTime($sectionSchedule['endTimeString']);
+    $time_str = _unh_d1_client_cv_time_string_sectionSchedule($sectionSchedule['endTimeString']);
+    $ret = DateTime::createFromFormat(UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT, $time_str);
   }
   return $ret;
 }

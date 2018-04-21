@@ -164,9 +164,9 @@ define("UNH_D1_CLIENT_SECTION_FUTURE_OFFERING", "future_offering");
 define("UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED", "enrollment_closed");
 
 
-
 /**
- * MISC CONSTANTS
+ * TIME CONSTANTS.
  */
- define('UNH_D1_CLIENT_TZ', 'America/New_York');
+define('UNH_D1_CLIENT_TZ', 'America/New_York');
+define("UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT", "hia");
 
