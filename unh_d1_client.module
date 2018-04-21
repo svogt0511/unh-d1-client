@@ -64,6 +64,7 @@
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.constants.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.data.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.settings.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.sort.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.utils.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.webservices_v54.inc';
 

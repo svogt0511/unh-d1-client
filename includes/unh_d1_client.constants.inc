@@ -60,6 +60,8 @@ define("UNH_D1_CLIENT_BASEENTITIES", "baseEntities");
 define("UNH_D1_CLIENT_PROGRAMAREAS", "programAreas");
 define("UNH_D1_CLIENT_SEARCHCOURSE", "searchCourse");
 define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
+define("UNH_D1_CLIENT_SEMESTERS", "semesters");
+
 
 /**
  * Webservices parameters - v5.4/5.5
@@ -148,6 +150,12 @@ const UNH_D1_CLIENT_API_REQUESTS = [
       'params' => array('programAreas', 'customSectionNumber'),
       'defaults' => array(),
       'builder' => array('programAreas' => '_unh_d1_client_build_programAreas'),
+    ],
+  ],
+  UNH_D1_CLIENT_SEMESTERS => [
+    'opts' => [
+      'params' => array('informationLevel', 'locale', '_type'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
     ],
   ]
 ];

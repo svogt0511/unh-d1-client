@@ -231,7 +231,32 @@ function unh_d1_client_getprogramAreasV1($information_level = 'short') {
   return $ret;
 }
 
+/**
+ * Returns a list of semesters.
+ *
+ * Gets the list through the semesters call.
+ */
+function unh_d1_client_getsemesters($information_level = 'short') {
+  $ret = array();
+  
+  $options = array('informationLevel'  =>  $information_level);
+  $criteria = array();
+  list($code, $error, $result) = unh_d1_client_request(
+    UNH_D1_CLIENT_SEMESTERS, 
+    '', 
+    $options, 
+    $criteria, 
+    'GET'
+  );
+  
+  // There could be some checking here, but mostly, best effort.
+  if ($code == '200') {
+    $semesters = $result['semester'];
+    $ret = _unh_d1_client_idxed_array($semesters);
+  }
 
+  return $ret;
+}
 /******************************************************************************
  *
  * Calls to determine STATUSES of various data objects returned by the API.
@@ -664,24 +689,4 @@ function unh_d1_client_get_notify_me_url($courseObjID, $sectionNumber) {
 }
 */
  
- 
-// card_header - section status to display in card header: waitlist, ???
-function unh_d1_client_getsectionDisplayStatus($courseCode, $section, $node) {
-  $ret = '';
-
-  if (_d1pdt_section_is_waitlisted($courseCode, $section, $node)) {
-    $ret = '<div class="section-wait-list-status">Wait List</div>';
-  } elseif (_d1pdt_section_will_be_available($courseCode, $section, $node)) {
-    $date = _d1pdt_section_availability_date($courseCode, $section, $node);
-    $msg = "Enrollment opens:&nbsp;&nbsp;" . $date;
-    if (!empty($msg)) {
-      $ret = '<div class="section-wait-list-status"  style="margin: 5px 0 0 0">' . $msg . '</div>';
-    }
-  }
-
-  return $ret;
-}
-
-
-
 
