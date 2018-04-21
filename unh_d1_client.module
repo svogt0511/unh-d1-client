@@ -172,11 +172,11 @@ function unh_d1_client_settings_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['unh_d1 client_domain_be'] = array(
+  $form['unh_d1_client_domain_be'] = array(
     '#type' => 'textfield',
     '#title' => t('UNH D1 Domain - Administrative'),
     '#size' => 256,
-    '#field_name' => 'unh_d1_client_domain_admin',
+    '#field_name' => 'unh_d1_client_domain_be',
     '#default_value' => variable_get('unh_d1_client_domain_be', UNH_D1_CLIENT_DOMAIN_BE),
     '#description' => t('The D1 server administrative domain.'),
     '#required' => TRUE,
