@@ -178,3 +178,10 @@ define("UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED", "enrollment_closed");
 define('UNH_D1_CLIENT_TZ', 'America/New_York');
 define("UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT", "hia");
 
+/** 
+ * SORT CONSTANTS 
+ */
+define("UNH_D1_CLIENT_SORT_ASCENDING", 0);
+define("UNH_D1_CLIENT_SORT_DESCENDING", 1);
+
+

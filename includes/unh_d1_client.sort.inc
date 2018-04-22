@@ -13,7 +13,7 @@
  * Given a list of sections, returns them sorted by semester/(start)date/(section)title.
  * 
  */
-function unh_d1_client_sort_sections_by_semesterStartDateSectionTitle($sections = array()) {
+function unh_d1_client_sort_sections_by_semesterStartDateSectionTitle($sections = array(), $sort_direction) {
   $ret = array();
 
   if (!empty($sections)) {
@@ -38,7 +38,7 @@ function unh_d1_client_sort_sections_by_semesterStartDateSectionTitle($sections 
       }
 
       uasort($sections,
-        function ($a, $b) {
+        function ($a, $b) use($sort_direction) {
           $ret = 0;
           if ($a['sort_semester'] < $b['sort_semester']) {
             $ret = -1;
@@ -52,6 +52,9 @@ function unh_d1_client_sort_sections_by_semesterStartDateSectionTitle($sections 
             } else {
               $ret = strnatcasecmp($a['sectionTitle'], $b['sectionTitle']);
             }
+          }
+          if ($sort_direction == UNH_D1_CLIENT_SORT_DESCENDING) {
+            $ret = -$ret;
           }
           return $ret;
         }
@@ -68,7 +71,7 @@ function unh_d1_client_sort_sections_by_semesterStartDateSectionTitle($sections 
  * Given a list of sections, returns them sorted by semester/(section)title.
  * 
  */
-function unh_d1_client_sort_sections_by_semesterSectionTitle($sections = array()) {
+function unh_d1_client_sort_sections_by_semesterSectionTitle($sections = array(), $sort_direction) {
   $ret = array();
 
   if (!empty($sections)) {
@@ -92,7 +95,7 @@ function unh_d1_client_sort_sections_by_semesterSectionTitle($sections = array()
       }
 
       uasort($sections,
-        function ($a, $b) {
+        function ($a, $b) use($sort_direction) {
           $ret = 0;
           if ($a['sort_semester'] < $b['sort_semester']) {
             $ret = -1;
@@ -100,6 +103,9 @@ function unh_d1_client_sort_sections_by_semesterSectionTitle($sections = array()
             $ret = 1;
           } else {
             $ret = strnatcasecmp($a['sectionTitle'], $b['sectionTitle']);
+          }
+          if ($sort_direction == UNH_D1_CLIENT_SORT_DESCENDING) {
+            $ret = -$ret;
           }
           return $ret;
         }
@@ -117,7 +123,7 @@ function unh_d1_client_sort_sections_by_semesterSectionTitle($sections = array()
  * Given a list of sections, returns them sorted by startDate/(section)title.
  * 
  */
-function unh_d1_client_sort_sections_by_startDateSectionTitle($sections = array()) {
+function unh_d1_client_sort_sections_by_startDateSectionTitle($sections = array(), $sort_direction) {
   $ret = array();
 
   if (!empty($sections)) {
@@ -133,7 +139,7 @@ function unh_d1_client_sort_sections_by_startDateSectionTitle($sections = array(
       }
 
       uasort($sections,
-        function ($a, $b) {
+        function ($a, $b) use($sort_direction) {
           $ret = 0;
           if ($a['sort_startDate'] < $b['sort_startDate']) {
             $ret = -1;
@@ -141,6 +147,9 @@ function unh_d1_client_sort_sections_by_startDateSectionTitle($sections = array(
             $ret = 1;
           } else {
             $ret = strnatcasecmp($a['sectionTitle'], $b['sectionTitle']);
+          }
+          if ($sort_direction == UNH_D1_CLIENT_SORT_DESCENDING) {
+            $ret = -$ret;
           }
           return $ret;
         }
@@ -157,7 +166,7 @@ function unh_d1_client_sort_sections_by_startDateSectionTitle($sections = array(
  * Given a list of sections, returns them sorted by (section)title.
  * 
  */
-function unh_d1_client_sort_sections_by_sectionTitle($sections = array()) {
+function unh_d1_client_sort_sections_by_sectionTitle($sections = array(), $sort_direction) {
   $ret = array();
 
   if (!empty($sections)) {
@@ -165,8 +174,12 @@ function unh_d1_client_sort_sections_by_sectionTitle($sections = array()) {
       //    By section title (asc)
 
       uasort($sections,
-        function ($a, $b) {
-          return strnatcasecmp($a['sectionTitle'], $b['sectionTitle']);
+        function ($a, $b) use($sort_direction) {
+          $ret = strnatcasecmp($a['sectionTitle'], $b['sectionTitle']);
+          if ($sort_direction == UNH_D1_CLIENT_SORT_DESCENDING) {
+            $ret = -$ret;
+          }
+          return $ret;
         }
       );
       
