@@ -56,6 +56,12 @@
  * See the configuration form, below for url and other D1 API config settings.
  *
  *
+ * UPDATE - DestinyOne v5.5 (Juggernaut) and Web Services Connect 2.0???:
+ * 
+ *   Documentation is now online at grow.destinysolutions.com:
+ *     https://grow.destinysolutions.com/Portals/0/Badges/Documents/Product%20Information/Destiny%20Connect/Destiny%20Connect%20V5.5/HTML5/WS%20Reference%20Guide%20v2-1.htm#Destiny%20Connect%20Web%20Services%20Reference%20Guide/Introduction.htm%3FTocPath%3DIntroduction%7C_____0
+ *
+ *   ** An account is needed to access the documentation.
  */
 
 /**
@@ -64,8 +70,15 @@
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.constants.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.data.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.settings.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.sort.inc';
 require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.utils.inc';
-require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.webservices_v54.inc';
+require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.webservices.v55.inc';
+
+if (unh_d1_client_settings_api_release() == UNH_D1_CLIENT_API_VERSION_54) {
+  require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.data.v54.inc';
+} else {  // (unh_d1_client_settings_api_release() == UNH_D1_CLIENT_API_VERSION_55) 
+  require_once drupal_get_path('module', 'unh_d1_client') . '/includes/unh_d1_client.data.v55.inc';
+}
 
 // @todo: is there an init hook for this?  
 // This could be a setting as well.
@@ -172,11 +185,11 @@ function unh_d1_client_settings_form($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['unh_d1 client_domain_be'] = array(
+  $form['unh_d1_client_domain_be'] = array(
     '#type' => 'textfield',
     '#title' => t('UNH D1 Domain - Administrative'),
     '#size' => 256,
-    '#field_name' => 'unh_d1_client_domain_admin',
+    '#field_name' => 'unh_d1_client_domain_be',
     '#default_value' => variable_get('unh_d1_client_domain_be', UNH_D1_CLIENT_DOMAIN_BE),
     '#description' => t('The D1 server administrative domain.'),
     '#required' => TRUE,

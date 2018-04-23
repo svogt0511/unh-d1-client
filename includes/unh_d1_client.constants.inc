@@ -60,6 +60,8 @@ define("UNH_D1_CLIENT_BASEENTITIES", "baseEntities");
 define("UNH_D1_CLIENT_PROGRAMAREAS", "programAreas");
 define("UNH_D1_CLIENT_SEARCHCOURSE", "searchCourse");
 define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
+define("UNH_D1_CLIENT_SEMESTERS", "semesters");
+
 
 /**
  * Webservices parameters - v5.4/5.5
@@ -149,6 +151,12 @@ const UNH_D1_CLIENT_API_REQUESTS = [
       'defaults' => array(),
       'builder' => array('programAreas' => '_unh_d1_client_build_programAreas'),
     ],
+  ],
+  UNH_D1_CLIENT_SEMESTERS => [
+    'opts' => [
+      'params' => array('informationLevel', 'locale', '_type'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
+    ],
   ]
 ];
 
@@ -164,9 +172,16 @@ define("UNH_D1_CLIENT_SECTION_FUTURE_OFFERING", "future_offering");
 define("UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED", "enrollment_closed");
 
 
-
 /**
- * MISC CONSTANTS
+ * TIME CONSTANTS.
  */
- define('UNH_D1_CLIENT_TZ', 'America/New_York');
+define('UNH_D1_CLIENT_TZ', 'America/New_York');
+define("UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT", "hia");
+
+/** 
+ * SORT CONSTANTS 
+ */
+define("UNH_D1_CLIENT_SORT_ASCENDING", 0);
+define("UNH_D1_CLIENT_SORT_DESCENDING", 1);
+
 

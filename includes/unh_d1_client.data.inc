@@ -15,7 +15,7 @@
 
 /******************************************************************************
  *
- * Calls to extract data of interest from the API.
+ * Functions to extract data of interest from the API.
  *
  ******************************************************************************/
 
@@ -71,8 +71,6 @@ function unh_d1_client_searchCourse_courseCode($course_code = '', $programAreas 
 
     // There could be some checking here, but mostly, best effort.
     if ($code == '200') {
-    ddl($result, '$result - EEEEEE');
-    ddl ($code, '$code - EEEEE');
       $course = $result['searchCourseResult']['courseProfiles']['courseProfile'];
       // Returning at most 1 course. (Don't use _unh_d1_client_idxed_array.)
       $ret = $course;
@@ -233,152 +231,36 @@ function unh_d1_client_getprogramAreasV1($information_level = 'short') {
   return $ret;
 }
 
-
-/******************************************************************************
- *
- * Calls to determine STATUSES of various data objects returned by the API.
- *
- ******************************************************************************/
-
-
 /**
- * Given a course, returns the course availability (TRUE OR FALSE).
+ * Returns a list of semesters.
  *
- * Courses are available if:
- *
- *   - there is 1 or more scheduled sections that:
- *       - Are publically available ('returnOnlyAvailableSectionsFlag = true). Default.
- *       - Have scheduled sections('searchOnlyScheduledCoursesFlag = 'true'). Default.
- *       - At least one of the scheduled sections is 'available'.
- *
- * Section is available if:
- *   - section status is "available" || "waitlist_available".
- * 
+ * Gets the list through the semesters call.
  */
-function unh_d1_client_courseIsAvailable($course = NULL) {
-  $ret = FALSE;
+function unh_d1_client_getsemesters($information_level = 'short') {
+  $ret = array();
   
-  if (!empty($course) && array_key_exists('courseNumber', $course)) {
-    $sections = unh_d1_client_searchCourseSections($course['courseNumber']);
-    
-    if (!empty($sections)) {
-      foreach($sections as $section) {
-        if (unh_d1_client_sectionIsAvailable($section) ||
-          unh_d1_client_sectionIsWaitlisted($section)
-        ) {
-          $ret = TRUE;
-          break;
-        }
-      }
-    }
+  $options = array('informationLevel'  =>  $information_level);
+  $criteria = array();
+  list($code, $error, $result) = unh_d1_client_request(
+    UNH_D1_CLIENT_SEMESTERS, 
+    '', 
+    $options, 
+    $criteria, 
+    'GET'
+  );
+  
+  // There could be some checking here, but mostly, best effort.
+  if ($code == '200') {
+    $semesters = $result['semester'];
+    $ret = _unh_d1_client_idxed_array($semesters);
   }
-  
-  return $ret;
-}
 
-/**
- * Given a section, returns the section availability (TRUE OR FALSE).
- *
- * @todo: set to return true/false depending on if API version is 5.4 or 5.5
- */
-function unh_d1_client_sectionIsAvailable($section = NULL) {
-  //return TRUE;
-
-  $ret = FALSE;
-  
-  if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_AVAILABLE) {
-      $ret = TRUE;
-    }
-  }
-  
-  return $ret;
-}
-
-/**
- * Given a section, returns the section is no longer available (TRUE OR FALSE).
- *
- */
-function unh_d1_client_sectionIsNoLongerAvailable($section = NULL) {
-  $ret = FALSE;
-  
-  if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_NO_LONGER_AVAILABLE) {
-      $ret = TRUE;
-    }
-  }
-  
-  return $ret;
-}
-
-/**
- * Given a section, returns the section is waitlisted (TRUE OR FALSE).
- *
- */
-function unh_d1_client_sectionIsWaitlisted($section = NULL) {
-  $ret = FALSE;
-  
-  if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_WAITLIST_AVAILABLE) {
-      $ret = TRUE;
-    }
-  }
-  ddl($ret, '$ret - waitlist status');
-  return $ret;
-}
-
-/**
- * Given a section, returns the section is a future offering (TRUE OR FALSE).
- *
- */
-function unh_d1_client_sectionIsFutureOffering($section = NULL) {
-  $ret = FALSE;
-  
-  if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_FUTURE_OFFERING) {
-      $ret = TRUE;
-    }
-  }
-  
-  return $ret;
-}
-
-/**
- * Given a section, returns the section is full (TRUE OR FALSE).
- *
- */
-function unh_d1_client_sectionIsFull($section = NULL) {
-  $ret = FALSE;
-  
-  if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_FULL) {
-      $ret = TRUE;
-    }
-  }
-  
-  return $ret;
-}
-
-/**
- * Given a section, returns the section is waitlisted (TRUE OR FALSE).
- * 
- * @todo: check dates, as well as status.
- */
-function unh_d1_client_sectionIsEnrollmentClosed($section = NULL) {
-  $ret = FALSE;
-  
-  if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED) {
-      $ret = TRUE;
-    }
-  }
-  
   return $ret;
 }
 
 /******************************************************************************
  *
- * Calls to extract data from COURSE objects obtained from the API.
+ * Functions to extract data from COURSE objects obtained from the API.
  *
  ******************************************************************************/
  
@@ -412,9 +294,26 @@ function unh_d1_client_getcourseNumber($course = NULL) {
   return $ret;
 }
 
+ 
+/**
+ *
+ * Given a course, returns the 'objectId'.
+ * 
+ */
+function unh_d1_client_getcourseObjectId($course = NULL) {
+  $ret = '';
+  
+  if (!empty($course) && array_key_exists('objectId', $course)) {
+    $ret = $course['objectId'];
+  }
+  
+  return $ret;
+}
+ 
+
 /******************************************************************************
  *
- * Calls to extract data from SECTION objects obtained from the API.
+ * Functions to extract data from SECTION objects obtained from the API.
  *
  ******************************************************************************/
 
@@ -567,7 +466,7 @@ function unh_d1_client_getSectionSchedules($section = NULL) {
 
 /******************************************************************************
  *
- * Calls to extract data from SECTION SCHEDULE objects obtained from the API.
+ * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
  *
  ******************************************************************************/
 
@@ -611,7 +510,9 @@ function unh_d1_client_getSectionScheduleEndDate($sectionSchedule = NULL) {
 function unh_d1_client_getSectionScheduleStartTime($sectionSchedule = NULL) {
   $ret = NULL;
   if (!empty($sectionSchedule) && array_key_exists('startTimeString', $sectionSchedule) && !empty($sectionSchedule['startTimeString'])) {
-    $ret = new DateTime($sectionSchedule['startTimeString']);
+    // $ret = new DateTime($sectionSchedule['startTimeString']);
+    $time_str = _unh_d1_client_cv_time_string_sectionSchedule($sectionSchedule['startTimeString']);
+    $ret = DateTime::createFromFormat(UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT, $time_str);
   }
   return $ret;
 }
@@ -626,14 +527,37 @@ function unh_d1_client_getSectionScheduleStartTime($sectionSchedule = NULL) {
 function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
   $ret = NULL;
   if (!empty($sectionSchedule) && array_key_exists('endTimeString', $sectionSchedule) && !empty($sectionSchedule['endTimeString'])) {
-    $ret = new DateTime($sectionSchedule['endTimeString']);
+    // $ret = new DateTime($sectionSchedule['endTimeString']);
+    $time_str = _unh_d1_client_cv_time_string_sectionSchedule($sectionSchedule['endTimeString']);
+    $ret = DateTime::createFromFormat(UNH_D1_DRUPAL_SECTION_SCHEDULE_TIME_FORMAT, $time_str);
   }
   return $ret;
 }
 
 /******************************************************************************
  *
- * Calls to build various urls for action buttons.
+ * Functions to extract data from arrays of SECTION objects obtained from the API.
+ *
+ ******************************************************************************/
+
+/**
+ *
+ * Given an array of sections, returns an array of their 'objectId's.
+ *
+ */
+function unh_d1_client_getSectionArrayObjectIds($sections = array()) {
+  $ret = array();
+  if (!empty($sections)) {
+    $ret = array_column($sections, 'objectId');
+  }
+  return $ret;
+}
+
+
+
+/******************************************************************************
+ *
+ * Functions to build various urls for action buttons.
  *
  ******************************************************************************/
  
@@ -660,24 +584,4 @@ function unh_d1_client_get_notify_me_url($courseObjID, $sectionNumber) {
 }
 */
  
- 
-// card_header - section status to display in card header: waitlist, ???
-function unh_d1_client_getsectionDisplayStatus($courseCode, $section, $node) {
-  $ret = '';
-
-  if (_d1pdt_section_is_waitlisted($courseCode, $section, $node)) {
-    $ret = '<div class="section-wait-list-status">Wait List</div>';
-  } elseif (_d1pdt_section_will_be_available($courseCode, $section, $node)) {
-    $date = _d1pdt_section_availability_date($courseCode, $section, $node);
-    $msg = "Enrollment opens:&nbsp;&nbsp;" . $date;
-    if (!empty($msg)) {
-      $ret = '<div class="section-wait-list-status"  style="margin: 5px 0 0 0">' . $msg . '</div>';
-    }
-  }
-
-  return $ret;
-}
-
-
-
 
