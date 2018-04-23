@@ -15,7 +15,7 @@
 
 /******************************************************************************
  *
- * Calls to extract data of interest from the API.
+ * Functions to extract data of interest from the API.
  *
  ******************************************************************************/
 
@@ -260,7 +260,7 @@ function unh_d1_client_getsemesters($information_level = 'short') {
 
 /******************************************************************************
  *
- * Calls to extract data from COURSE objects obtained from the API.
+ * Functions to extract data from COURSE objects obtained from the API.
  *
  ******************************************************************************/
  
@@ -294,9 +294,26 @@ function unh_d1_client_getcourseNumber($course = NULL) {
   return $ret;
 }
 
+ 
+/**
+ *
+ * Given a course, returns the 'objectId'.
+ * 
+ */
+function unh_d1_client_getcourseObjectId($course = NULL) {
+  $ret = '';
+  
+  if (!empty($course) && array_key_exists('objectId', $course)) {
+    $ret = $course['objectId'];
+  }
+  
+  return $ret;
+}
+ 
+
 /******************************************************************************
  *
- * Calls to extract data from SECTION objects obtained from the API.
+ * Functions to extract data from SECTION objects obtained from the API.
  *
  ******************************************************************************/
 
@@ -449,7 +466,7 @@ function unh_d1_client_getSectionSchedules($section = NULL) {
 
 /******************************************************************************
  *
- * Calls to extract data from SECTION SCHEDULE objects obtained from the API.
+ * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
  *
  ******************************************************************************/
 
@@ -519,7 +536,28 @@ function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
 
 /******************************************************************************
  *
- * Calls to build various urls for action buttons.
+ * Functions to extract data from arrays of SECTION objects obtained from the API.
+ *
+ ******************************************************************************/
+
+/**
+ *
+ * Given an array of sections, returns an array of their 'objectId's.
+ *
+ */
+function unh_d1_client_getSectionArrayObjectIds($sections = array()) {
+  $ret = array();
+  if (!empty($sections)) {
+    $ret = array_column($sections, 'objectId');
+  }
+  return $ret;
+}
+
+
+
+/******************************************************************************
+ *
+ * Functions to build various urls for action buttons.
  *
  ******************************************************************************/
  
