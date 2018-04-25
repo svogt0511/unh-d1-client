@@ -451,6 +451,13 @@ function unh_d1_client_getSectionPvAvailabilityEndDate($section = NULL) {
   return $ret;
 }
 
+
+/******************************************************************************
+ *
+ * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
+ *
+ ******************************************************************************/
+
 /**
  *
  * Given a section, returns an array of 'sectionSchedules'.
@@ -463,12 +470,6 @@ function unh_d1_client_getSectionSchedules($section = NULL) {
   }
   return $ret;
 }
-
-/******************************************************************************
- *
- * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
- *
- ******************************************************************************/
 
 /**
  *
@@ -533,6 +534,155 @@ function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
   }
   return $ret;
 }
+
+
+/******************************************************************************
+ *
+ * Functions to extract data from COURSE SECTION FEE objects obtained from the API.
+ * In particular, we are interested in the first array of 'tuitionFeeItems' 
+ * and its associated 'publisedCode'.
+ *
+ ******************************************************************************/
+
+/**
+ *
+ * Given a section, returns an array of 'courseSectionFees'.
+ *
+ */
+function unh_d1_client_getCourseSectionFees($section = NULL) {
+  $ret = array();
+  if (!empty($section) && array_key_exists('courseSectionFees', $section)) {
+    $ret = _unh_d1_client_idxed_array($section['courseSectionFees']['courseSectionFee']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given a courseSectionFee object, returns an array of 'associatedSectionFeeTuitionProfiles'.
+ *
+ */
+function unh_d1_client_getAssociatedSectionFeeTuitionProfiles($courseSectionFee = NULL) {
+  $ret = array();
+  if (!empty($courseSectionFee) && array_key_exists('associatedSectionFeeTuitionProfiles', $courseSectionFee)) {
+    $ret = _unh_d1_client_idxed_array($courseSectionFee['associatedSectionFeeTuitionProfiles']['associatedSectionFeeTuitionProfile']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given an associatedSectionFeeTuitionProfiles object, returns an 'associatedTuitionProfile'.
+ *
+ */
+function unh_d1_client_getAssociatedTuitionProfile($associatedSectionFeeTuitionProfile = NULL) {
+  $ret = NULL;
+  if (!empty($associatedSectionFeeTuitionProfile) && array_key_exists('associatedTuitionProfile', $associatedSectionFeeTuitionProfile)) {
+    $ret = $associatedSectionFeeTuitionProfile['associatedTuitionProfile'];
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given an 'associatedTuitionProfile' object, returns an 'publishedCode'.
+ *
+ */
+function unh_d1_client_getPublishedCode($associatedTuitionProfile = NULL) {
+  $ret = '';
+  if (!empty($associatedTuitionProfile) && array_key_exists('publishedCode', $associatedTuitionProfile)) {
+    $ret = $associatedTuitionProfile['publishedCode'];
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given an 'associatedTuitionProfile' object, returns an array of 'tuitionFees'.
+ *
+ */
+function unh_d1_client_getTuitionFees($associatedTuitionProfile = NULL) {
+  $ret = array();
+  if (!empty($associatedTuitionProfile) && array_key_exists('tuitionFees', $associatedTuitionProfile)) {
+    $ret = _unh_d1_client_idxed_array($associatedTuitionProfile['tuitionFees']['tuitionFee']);
+  }
+  return $ret;
+}
+
+
+/**
+ *
+ * Given a 'tuitionFee' object, returns an array of 'tuitionFeeItems'.
+ *
+ */
+function unh_d1_client_getTuitionFeeItems($tuitionFee = NULL) {
+  $ret = array();
+  if (!empty($tuitionFee) && array_key_exists('tuitionFeeItems', $tuitionFee)) {
+    $ret = _unh_d1_client_idxed_array($tuitionFee['tuitionFeeItems']['tuitionFeeItem']);
+  }
+  return $ret;
+}
+
+
+/**
+ *
+ * Now, given the section, get the array of tuition items.
+ *
+ * We are running on the assumption that our case is really simple and has only
+ * one interesting set of tuition items, which are contained in the first 
+ * 'courseTuitionFees'.
+ *
+ * Return a structure containing:
+ *   - an array of fee 'items',
+ *     - dollar amount
+ *     - whether this fee is discountable (true/false)
+ *   - the published code
+ * associated with the given section.
+ *
+ */
+function unh_d1_client_getSectionTuitionItems($section = NULL) {
+  $ret = NULL;
+  
+  if (!empty($section)) {
+    $course_section_fees = unh_d1_client_getCourseSectionFees($section);
+    ddl($course_section_fees, '$course_section_fees');
+    if (!empty($course_section_fees)) {
+      $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fees[0]);
+    ddl($associated_section_fee_tuition_profiles, '$associated_section_fee_tuition_profiles');
+      
+      if (!empty($associated_section_fee_tuition_profiles)) {
+        $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($associated_section_fee_tuition_profiles[0]);
+    ddl($associated_tuition_profile, '$associated_tuition_profile');
+        
+        if (!empty($associated_tuition_profile)) {
+          $published_code = unh_d1_client_getPublishedCode($associated_tuition_profile);
+          $tuition_fees = unh_d1_client_getTuitionFees($associated_tuition_profile);
+    ddl($published_code, '$published_code');
+    ddl($tuition_fees, '$tuition_fees');
+          
+          if (!empty($tuition_fees)) {
+            $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fees[0]);
+    ddl($tuition_fee_items, '$tuition_fee_items');
+            if (!empty($tuition_fee_items)) {
+              $tuition = array();
+              foreach($tuition_fee_items as $item) {
+                $tuition[] = [
+                  'amount' => '$'. $item['amount'],
+                  'discountable' => $item['discountable']
+                ];
+              }
+              $ret['tuition_items'] = $tuition;
+              $ret['published_code'] = $published_code;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  return $ret;
+}
+
 
 /******************************************************************************
  *
