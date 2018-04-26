@@ -548,6 +548,7 @@ function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
  *
  * Given a section, returns an array of 'courseSectionFees'.
  *
+ * N of these. (Assumption is 1 only.)
  */
 function unh_d1_client_getCourseSectionFees($section = NULL) {
   $ret = array();
@@ -561,6 +562,7 @@ function unh_d1_client_getCourseSectionFees($section = NULL) {
  *
  * Given a courseSectionFee object, returns an array of 'associatedSectionFeeTuitionProfiles'.
  *
+ * N of these each with published code.
  */
 function unh_d1_client_getAssociatedSectionFeeTuitionProfiles($courseSectionFee = NULL) {
   $ret = array();
@@ -574,6 +576,7 @@ function unh_d1_client_getAssociatedSectionFeeTuitionProfiles($courseSectionFee 
  *
  * Given an associatedSectionFeeTuitionProfiles object, returns an 'associatedTuitionProfile'.
  *
+ * 1 of these each with published code.
  */
 function unh_d1_client_getAssociatedTuitionProfile($associatedSectionFeeTuitionProfile = NULL) {
   $ret = NULL;
@@ -632,51 +635,49 @@ function unh_d1_client_getTuitionFeeItems($tuitionFee = NULL) {
  * one interesting set of tuition items, which are contained in the first 
  * 'courseTuitionFees'.
  *
- * Return a structure containing:
- *   - an array of fee 'items',
- *     - dollar amount
- *     - whether this fee is discountable (true/false)
- *   - the published code
- * associated with the given section.
+ * Returns a structure named 'tuition_info' containing:
+ *  - an array of data structs, tuition:
+ *    - dollar amount
+ *    - discountable flag (true/false)
+ *  - the published code
  *
  */
-function unh_d1_client_getSectionTuitionItems($section = NULL) {
-  $ret = NULL;
+function unh_d1_client_getSectionTuitionInfo($section = array()) {
+  $ret = array();
   
   if (!empty($section)) {
     $course_section_fees = unh_d1_client_getCourseSectionFees($section);
-    ddl($course_section_fees, '$course_section_fees');
     if (!empty($course_section_fees)) {
+      // Assuming only 1.
       $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fees[0]);
-    ddl($associated_section_fee_tuition_profiles, '$associated_section_fee_tuition_profiles');
-      
-      if (!empty($associated_section_fee_tuition_profiles)) {
-        $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($associated_section_fee_tuition_profiles[0]);
-    ddl($associated_tuition_profile, '$associated_tuition_profile');
-        
+    
+      $tuition_info = [];
+      foreach($associated_section_fee_tuition_profiles as $profile) {
+        $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($profile);
+       
+        // This is it!!!!!!
         if (!empty($associated_tuition_profile)) {
-          $published_code = unh_d1_client_getPublishedCode($associated_tuition_profile);
+        
           $tuition_fees = unh_d1_client_getTuitionFees($associated_tuition_profile);
-    ddl($published_code, '$published_code');
-    ddl($tuition_fees, '$tuition_fees');
           
-          if (!empty($tuition_fees)) {
-            $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fees[0]);
-    ddl($tuition_fee_items, '$tuition_fee_items');
-            if (!empty($tuition_fee_items)) {
-              $tuition = array();
-              foreach($tuition_fee_items as $item) {
-                $tuition[] = [
-                  'amount' => '$'. $item['amount'],
-                  'discountable' => $item['discountable']
-                ];
-              }
-              $ret['tuition_items'] = $tuition;
-              $ret['published_code'] = $published_code;
+          foreach($tuition_fees as $tuition_fee) {
+            $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fee);
+            
+            $items = [];
+            foreach($tuition_fee_items as $tuition_fee_item) {
+              $item['amount'] = $tuition_fee_item['amount'];
+              $item['discountable'] = $tuition_fee_item['discountable'];
+              $items[] = $item;
             }
+            $tuition['items'] = $items;
+            $tuition['published_code'] = $tuition_fee['printCode'];
+            $tuition_info[] = $tuition;
           }
+           $ret = $tuition_info;
         }
-      }
+        // This is it!!!!!!
+        
+      }  
     }
   }
   
