@@ -451,6 +451,13 @@ function unh_d1_client_getSectionPvAvailabilityEndDate($section = NULL) {
   return $ret;
 }
 
+
+/******************************************************************************
+ *
+ * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
+ *
+ ******************************************************************************/
+
 /**
  *
  * Given a section, returns an array of 'sectionSchedules'.
@@ -463,12 +470,6 @@ function unh_d1_client_getSectionSchedules($section = NULL) {
   }
   return $ret;
 }
-
-/******************************************************************************
- *
- * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
- *
- ******************************************************************************/
 
 /**
  *
@@ -533,6 +534,156 @@ function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
   }
   return $ret;
 }
+
+
+/******************************************************************************
+ *
+ * Functions to extract data from COURSE SECTION FEE objects obtained from the API.
+ * In particular, we are interested in the first array of 'tuitionFeeItems' 
+ * and its associated 'publisedCode'.
+ *
+ ******************************************************************************/
+
+/**
+ *
+ * Given a section, returns an array of 'courseSectionFees'.
+ *
+ * N of these. (Assumption is 1 only.)
+ */
+function unh_d1_client_getCourseSectionFees($section = NULL) {
+  $ret = array();
+  if (!empty($section) && array_key_exists('courseSectionFees', $section)) {
+    $ret = _unh_d1_client_idxed_array($section['courseSectionFees']['courseSectionFee']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given a courseSectionFee object, returns an array of 'associatedSectionFeeTuitionProfiles'.
+ *
+ * N of these each with published code.
+ */
+function unh_d1_client_getAssociatedSectionFeeTuitionProfiles($courseSectionFee = NULL) {
+  $ret = array();
+  if (!empty($courseSectionFee) && array_key_exists('associatedSectionFeeTuitionProfiles', $courseSectionFee)) {
+    $ret = _unh_d1_client_idxed_array($courseSectionFee['associatedSectionFeeTuitionProfiles']['associatedSectionFeeTuitionProfile']);
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given an associatedSectionFeeTuitionProfiles object, returns an 'associatedTuitionProfile'.
+ *
+ * 1 of these each with published code.
+ */
+function unh_d1_client_getAssociatedTuitionProfile($associatedSectionFeeTuitionProfile = NULL) {
+  $ret = NULL;
+  if (!empty($associatedSectionFeeTuitionProfile) && array_key_exists('associatedTuitionProfile', $associatedSectionFeeTuitionProfile)) {
+    $ret = $associatedSectionFeeTuitionProfile['associatedTuitionProfile'];
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given an 'associatedTuitionProfile' object, returns an 'publishedCode'.
+ *
+ */
+function unh_d1_client_getPublishedCode($associatedTuitionProfile = NULL) {
+  $ret = '';
+  if (!empty($associatedTuitionProfile) && array_key_exists('publishedCode', $associatedTuitionProfile)) {
+    $ret = $associatedTuitionProfile['publishedCode'];
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given an 'associatedTuitionProfile' object, returns an array of 'tuitionFees'.
+ *
+ */
+function unh_d1_client_getTuitionFees($associatedTuitionProfile = NULL) {
+  $ret = array();
+  if (!empty($associatedTuitionProfile) && array_key_exists('tuitionFees', $associatedTuitionProfile)) {
+    $ret = _unh_d1_client_idxed_array($associatedTuitionProfile['tuitionFees']['tuitionFee']);
+  }
+  return $ret;
+}
+
+
+/**
+ *
+ * Given a 'tuitionFee' object, returns an array of 'tuitionFeeItems'.
+ *
+ */
+function unh_d1_client_getTuitionFeeItems($tuitionFee = NULL) {
+  $ret = array();
+  if (!empty($tuitionFee) && array_key_exists('tuitionFeeItems', $tuitionFee)) {
+    $ret = _unh_d1_client_idxed_array($tuitionFee['tuitionFeeItems']['tuitionFeeItem']);
+  }
+  return $ret;
+}
+
+
+/**
+ *
+ * Now, given the section, get the array of tuition items.
+ *
+ * We are running on the assumption that our case is really simple and has only
+ * one interesting set of tuition items, which are contained in the first 
+ * 'courseTuitionFees'.
+ *
+ * Returns a structure named 'tuition_info' containing:
+ *  - an array of data structs, tuition:
+ *    - dollar amount
+ *    - discountable flag (true/false)
+ *  - the published code
+ *
+ */
+function unh_d1_client_getSectionTuitionInfo($section = array()) {
+  $ret = array();
+  
+  if (!empty($section)) {
+    $course_section_fees = unh_d1_client_getCourseSectionFees($section);
+    if (!empty($course_section_fees)) {
+      // Assuming only 1.
+      $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fees[0]);
+    
+      $tuition_info = [];
+      foreach($associated_section_fee_tuition_profiles as $profile) {
+        $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($profile);
+       
+        // This is it!!!!!!
+        if (!empty($associated_tuition_profile)) {
+        
+          $tuition_fees = unh_d1_client_getTuitionFees($associated_tuition_profile);
+          
+          foreach($tuition_fees as $tuition_fee) {
+            $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fee);
+            
+            $items = [];
+            foreach($tuition_fee_items as $tuition_fee_item) {
+              $item['amount'] = $tuition_fee_item['amount'];
+              $item['discountable'] = $tuition_fee_item['discountable'];
+              $items[] = $item;
+            }
+            $tuition['items'] = $items;
+            $tuition['published_code'] = $tuition_fee['printCode'];
+            $tuition_info[] = $tuition;
+          }
+           $ret = $tuition_info;
+        }
+        // This is it!!!!!!
+        
+      }  
+    }
+  }
+  
+  return $ret;
+}
+
 
 /******************************************************************************
  *
