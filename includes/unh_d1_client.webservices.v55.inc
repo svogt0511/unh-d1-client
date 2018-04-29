@@ -317,11 +317,20 @@ function _unh_d1_client_cache_key($str) {
  *
  * @todo: submit bug report - programAreas
  */
-function _unh_d1_client_build_programAreas($programArea = '') {
+function _unh_d1_client_build_programAreas($programAreas) {
   $ret = array();
-  //foreach($programAreas as $programArea) {
-    $ret['programAreaCode'] = $programArea;
-  //}
+  
+  if (!empty($programAreas)) {
+    if (is_array($programAreas)) {
+      foreach($programAreas as $programArea) {
+        $ret['programAreaCode'] = $programArea;
+      }
+    } else {
+      $ret['programAreaCode'] = $programAreas;
+    }
+  }
+ddl($ret, '$programAreas - yyyy');
+
   return $ret;
 }
 

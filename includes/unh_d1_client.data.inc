@@ -294,6 +294,20 @@ function unh_d1_client_getcourseNumber($course = NULL) {
   return $ret;
 }
 
+/**
+ *
+ * Given a course, returns the 'officialCourseDescriptionPublic'.
+ * 
+ */
+function unh_d1_client_getcourseOverview($course = NULL) {
+  $ret = '';
+  
+  if (!empty($course) && array_key_exists('officialCourseDescriptionPublic', $course)) {
+    $ret = $course['officialCourseDescriptionPublic'];
+  }
+  
+  return $ret;
+}
  
 /**
  *
