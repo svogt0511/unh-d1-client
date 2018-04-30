@@ -265,9 +265,6 @@ function unh_d1_client_getCertificates($programArea = '', $information_level = '
   $ret = array();
   
   $options = array('informationLevel'  =>  $information_level);
-  if (!empty($programAreas)) {
-    $options['programAreas'] = $programAreas;
-  }
   $criteria = array();
   
   list($code, $error, $result) = unh_d1_client_request(
