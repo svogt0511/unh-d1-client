@@ -277,9 +277,6 @@ function unh_d1_client_getCertificates($programArea = '', $information_level = '
     $criteria, 
     'GET'
   );
-  ddl($code, '$code');
-  ddl($error, '$error');
-  ddl($result, '$result');
   
   // There could be some checking here, but mostly, best effort.
   if ($code == '200') {
