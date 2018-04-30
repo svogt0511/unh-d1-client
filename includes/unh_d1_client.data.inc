@@ -294,6 +294,20 @@ function unh_d1_client_getcourseNumber($course = NULL) {
   return $ret;
 }
 
+/**
+ *
+ * Given a course, returns the 'officialCourseDescriptionPublic'.
+ * 
+ */
+function unh_d1_client_getcourseOverview($course = NULL) {
+  $ret = '';
+  
+  if (!empty($course) && array_key_exists('officialCourseDescriptionPublic', $course)) {
+    $ret = $course['officialCourseDescriptionPublic'];
+  }
+  
+  return $ret;
+}
  
 /**
  *
@@ -687,7 +701,7 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
 
 /******************************************************************************
  *
- * Functions to extract data from arrays of SECTION objects obtained from the API.
+ * Functions to extract objectIds from SECTION objects obtained from the API.
  *
  ******************************************************************************/
 
@@ -705,23 +719,45 @@ function unh_d1_client_getSectionArrayObjectIds($sections = array()) {
 }
 
 
+/**
+ *
+ * Given a section, returns the 'associatedCourse' objectId.
+ *
+ */
+function unh_d1_client_getSectionAssocCourseObjectId($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('associatedCourse', $section)) {
+    $ret = $section['associatedCourse']['objectId'];
+  }
+  return $ret;
+}
+
+
 
 /******************************************************************************
  *
  * Functions to build various urls for action buttons.
  *
+ * These urls should be module settings.
+ *
  ******************************************************************************/
  
- //UTIL: Returns the enrollment url.  The actual url should be a module parameter.
+ //UTIL: Returns the enrollment url.
 function unh_d1_client_get_enrollment_url($section) {
-  //return 'https://learnforlife.unh.edu/search/publicCourseSearchDetails.do?method=addToCart&cspIndex=' . $sectionID;
+  // return 'https://learnforlife.unh.edu/search/publicCourseSearchDetails.do?method=addToCart&cspIndex=' . $sectionID;
   return 'https://' . unh_d1_client_settings_public_domain() . '/search/publicCourseSearchDetails.do?method=addToCart&cspIndex=' . unh_d1_client_getsectionObjectId($section);
 }
 
-//UTIL: Returns the wait list url.  The actual url should be a module parameter.
+//UTIL: Returns the wait list url.
 function unh_d1_client_get_wait_list_url($section) {
-  //return 'https://learnforlife.unh.edu/search/publicCourseSearchDetails.do?method=addToCart&cspIndex=' . $sectionID;
+  // return 'https://learnforlife.unh.edu/search/publicCourseSearchDetails.do?method=addToCart&cspIndex=' . $sectionID;
   return 'https://' . unh_d1_client_settings_public_domain() . '/search/publicCourseSearchDetails.do?method=addToCart&cspIndex=' . unh_d1_client_getsectionObjectId($section);
+}
+
+//UTIL: Returns the request more info url.
+function unh_d1_client_get_request_more_info_url($section) {
+  // return 'https://unhtestpv.destinysolutions.com/public/student/studentRequestInformation.do?method=edit&type=0&courseNumber=798519&notify=section'
+  return 'https://' . unh_d1_client_settings_public_domain() . '/public/student/studentRequestInformation.do?method=edit&type=0&notify=section&courseNumber=' . unh_d1_client_getSectionAssocCourseObjectId($section);
 }
 
 /*

@@ -15,6 +15,14 @@
  *
  ******************************************************************************/
 
+function unh_d1_client_webservice_path() {
+  $ret = NULL;
+  
+  $ret = variable_get('unh_d1_client_webservice_path', '');
+  
+  return $ret;
+}
+
 function unh_d1_client_settings_public_domain() {
   $ret = NULL;
   
