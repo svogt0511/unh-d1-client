@@ -57,6 +57,7 @@ define("UNH_D1_CLIENT_WEBSVC_RQST_FMT", "application/json");
  * Hopefully this can be easily expanded to handle more requests.
  */
 define("UNH_D1_CLIENT_BASEENTITIES", "baseEntities");
+define("UNH_D1_CLIENT_CERTIFICATES", "certificates");
 define("UNH_D1_CLIENT_PROGRAMAREAS", "programAreas");
 define("UNH_D1_CLIENT_SEARCHCOURSE", "searchCourse");
 define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
@@ -83,6 +84,12 @@ const UNH_D1_CLIENT_API_REQUESTS = [
   UNH_D1_CLIENT_BASEENTITIES => [
     'opts' => [
       'params' => array('informationLevel', 'locale', '_type'),
+      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
+    ],
+  ],
+  UNH_D1_CLIENT_CERTIFICATES => [
+    'opts' => [
+      'params' => array('informationLevel', 'locale', 'programOfficeCode', '_type'),
       'defaults' => array('informationLevel' => 'short','_type' => 'json'),
     ],
   ],

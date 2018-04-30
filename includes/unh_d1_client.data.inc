@@ -258,6 +258,65 @@ function unh_d1_client_getsemesters($information_level = 'short') {
   return $ret;
 }
 
+/**
+ * Given a program area, returns an array of certificates from that programArea.
+ */
+function unh_d1_client_getCertificates($programArea = '', $information_level = 'short') {
+  $ret = array();
+  
+  $options = array('informationLevel'  =>  $information_level);
+  if (!empty($programAreas)) {
+    $options['programAreas'] = $programAreas;
+  }
+  $criteria = array();
+  
+  list($code, $error, $result) = unh_d1_client_request(
+    UNH_D1_CLIENT_CERTIFICATES, 
+    '', 
+    $options, 
+    $criteria, 
+    'GET'
+  );
+  ddl($code, '$code');
+  ddl($error, '$error');
+  ddl($result, '$result');
+  
+  // There could be some checking here, but mostly, best effort.
+  if ($code == '200') {
+    $certificates = $result['certificate'];
+    $certificates = _unh_d1_client_idxed_array($certificates);
+    
+    foreach($certificates as $certificate) {
+      if (unh_d1_client_getCertificateProgramAreaCode($certificate) == $programArea) {
+        $ret[] = $certificate;
+      }
+    }
+  }
+
+  return $ret;
+}
+
+/******************************************************************************
+ *
+ * Functions to extract data from CERTIFICATE objects obtained from the API.
+ *
+ ******************************************************************************/
+ 
+/**
+ *
+ * Given a certificate, returns the 'programAreaCode'.
+ * 
+ */
+function unh_d1_client_getCertificateProgramAreaCode($certificate = NULL) {
+  $ret = '';
+  
+  if (!empty($certificate) && array_key_exists('programArea', $certificate)) {
+    $ret = $certificate['programArea']['code'];
+  }
+  
+  return $ret;
+}
+
 /******************************************************************************
  *
  * Functions to extract data from COURSE objects obtained from the API.
