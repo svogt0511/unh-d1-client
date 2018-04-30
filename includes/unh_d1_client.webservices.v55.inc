@@ -314,13 +314,23 @@ function _unh_d1_client_cache_key($str) {
  * This is kind of funky because of a bug in the API (json).
  * We only use the last programArea because there is no way we can express
  * multiple programAreas in their json interpretation of the request.
+ *
+ * @todo: submit bug report - programAreas
  */
-function _unh_d1_client_build_programAreas($programAreas = array()) {
+function _unh_d1_client_build_programAreas($programAreas) {
   $ret = array();
-
-  foreach($programAreas as $programArea) {
-    $ret['programAreaCode'] = $programArea;
+  
+  if (!empty($programAreas)) {
+    if (is_array($programAreas)) {
+      foreach($programAreas as $programArea) {
+        $ret['programAreaCode'] = $programArea;
+      }
+    } else {
+      $ret['programAreaCode'] = $programAreas;
+    }
   }
+ddl($ret, '$programAreas - yyyy');
+
   return $ret;
 }
 
