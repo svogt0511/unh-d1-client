@@ -389,7 +389,7 @@ function unh_d1_client_getcourseObjectId($course = NULL) {
  * Given a section, returns the 'sectionTitle'.
  * 
  */
-function unh_d1_client_getsectionTitle($section = '') {
+function unh_d1_client_getsectionTitle($section = NULL) {
   $ret = '';
   
   if (!empty($section) && array_key_exists('sectionTitle', $section)) {
@@ -404,7 +404,7 @@ function unh_d1_client_getsectionTitle($section = '') {
  * Given a section, returns the 'customSectionNumber'.
  * 
  */
-function unh_d1_client_getsectionCustomSectionNumber($section = '') {
+function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
   $ret = '';
   
   if (!empty($section) && array_key_exists('customSectionNumber', $section)) {
@@ -419,7 +419,7 @@ function unh_d1_client_getsectionCustomSectionNumber($section = '') {
  * Given a section, returns the 'sectionAvailabilityCode'.
  * 
  */
-function unh_d1_client_getsectionAvailabilityCode($section = '') {
+function unh_d1_client_getsectionAvailabilityCode($section = NULL) {
   $ret = '';
   
   if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
@@ -644,6 +644,21 @@ function unh_d1_client_getSectionInstructorNames($sectionSchedule = NULL) {
         }
       }
     }
+  }
+
+  return $ret;
+}
+
+/**
+ *
+ * Given a sectionSchedule, returns the campus/location name.
+ *
+ */
+function unh_d1_client_getSectionCampusName($sectionSchedule = NULL) {
+  $ret = '';
+
+  if (!empty($sectionSchedule) && array_key_exists('campus', $sectionSchedule)) {
+    $ret = $sectionSchedule['campus']['name'];
   }
 
   return $ret;
