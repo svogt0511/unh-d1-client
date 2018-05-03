@@ -415,6 +415,45 @@ function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
 
 /**
  *
+ * Given a section, returns an array of the section 'discounts'.
+ * 
+ */
+function unh_d1_client_getsectionDiscounts($section = NULL) {
+  $ret = array();
+  
+  if (!empty($section) && array_key_exists('discounts', $section)) {
+    $ret = _unh_d1_client_idxed_array($section['discounts']['discount']);
+  }
+  
+  return $ret;
+}
+
+/**
+ *
+ * Given a section, returns an array of discount names.
+ * 
+ */
+function unh_d1_client_getsectionDiscountNames($section = NULL) {
+  $ret = array();
+  
+  if (!empty($section)) {
+    $discounts = unh_d1_client_getsectionDiscounts($section);
+    
+    if (!empty($discounts)) {
+      foreach($discounts as $discount) {
+        if ($discount['publicApplicable']) {
+          $ret[] = $discount['printCode'];
+        }
+      }
+    }
+  }
+  
+    return $ret;
+}
+
+
+/**
+ *
  * Given a section, returns the 'contact hours' (sectionDenormInfo['calculatedTotalHours]).
  * 
  */
