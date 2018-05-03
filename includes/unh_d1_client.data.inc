@@ -410,7 +410,37 @@ function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
   if (!empty($section) && array_key_exists('customSectionNumber', $section)) {
     $ret = $section['customSectionNumber'];
   }
-  
+  return $ret;
+}
+
+/**
+ *
+ * Given a section, returns the 'contact hours' (sectionDenormInfo['calculatedTotalHours]).
+ * 
+ */
+function unh_d1_client_getsectionContactHours($section = NULL) {
+  $ret = '';
+
+  if (!empty($section) && array_key_exists('sectionDenormInfo', $section)) {
+    $ret = $section['sectionDenormInfo']['calculatedTotalHours'];
+  }
+
+  return $ret;
+}
+
+
+/**
+ *
+ * Given a section, returns the 'CEUs' (sectionDenormInfo['calculatedTotalHours]).
+ * 
+ */
+function unh_d1_client_getsectionCEUs($section = NULL) {
+  $ret = '';
+
+  if (!empty($section) && array_key_exists('maxCEUnit', $section)) {
+    $ret = $section['maxCEUnit'];
+  }
+
   return $ret;
 }
 
