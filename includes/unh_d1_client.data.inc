@@ -602,6 +602,53 @@ function unh_d1_client_getSectionScheduleEndTime($sectionSchedule = NULL) {
   return $ret;
 }
 
+/**
+ *
+ * Given a sectionSchedule, returns an array of instructors.
+ *
+ */
+function unh_d1_client_getSectionInstructors($sectionSchedule = NULL) {
+  $ret = array();
+  
+  if (!empty($sectionSchedule) && array_key_exists('assignedInstructors', $sectionSchedule)) {
+    $ret = _unh_d1_client_idxed_array($sectionSchedule['assignedInstructors']['assignedInstructor']);
+  }
+
+  return $ret;
+}
+
+/**
+ *
+ * Given a sectionSchedule, returns an array of instructor names.
+ *
+ */
+function unh_d1_client_getSectionInstructorNames($sectionSchedule = NULL) {
+  $ret = array();
+
+  if (!empty($sectionSchedule)) {
+    $assignedInstructors = unh_d1_client_getSectionInstructors($sectionSchedule);
+
+    if (!empty($assignedInstructors)) {
+      foreach ($assignedInstructors as $instructor) {
+        $instructor_name = '';
+        if (!empty($instructor['instructor']['firstName1']) && !empty($instructor['instructor']['lastName'])) {
+          $instructor_name = $instructor['instructor']['firstName1'] . ' ' . $instructor['instructor']['lastName'];      
+        } elseif (!empty($instructor['instructor']['firstName1'])) {
+          $instructor_name = $instructor['instructor']['firstName1'];
+        } elseif (!empty($instructor['instructor']['lastName'])) {
+          $instructor_name = $instructor['instructor']['lastName'];
+        }
+
+        if (!empty($instructor_name)) {
+          $ret[] = $instructor_name;
+        }
+      }
+    }
+  }
+
+  return $ret;
+}
+
 
 /******************************************************************************
  *
