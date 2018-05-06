@@ -376,7 +376,7 @@ function unh_d1_client_getcourseObjectId($course = NULL) {
   
   return $ret;
 }
- 
+
 
 /******************************************************************************
  *
