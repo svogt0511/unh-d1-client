@@ -43,11 +43,13 @@ function unh_d1_client_searchCourse_keyword($keyword = '', $programAreas = array
     if ($code == '200') {
       if (!empty($result['searchCourseResult']['courseProfiles'])) {
         $courses = $result['searchCourseResult']['courseProfiles']['courseProfile'];
+        ddl($result, '$result');
         $ret = _unh_d1_client_idxed_array($courses);
       }
     }
   }
-
+  ddl($keyword, '$keyword');
+  ddl($ret, '$ret');
   return $ret;
 }
 
@@ -376,7 +378,7 @@ function unh_d1_client_getcourseObjectId($course = NULL) {
   
   return $ret;
 }
- 
+
 
 /******************************************************************************
  *

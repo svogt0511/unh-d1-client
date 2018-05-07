@@ -43,8 +43,6 @@
  * 
  */
 function unh_d1_client_courseIsAvailable($course = NULL) {
-  // for testing with 5.4 @todo
-  return TRUE;
   $ret = FALSE;
   
   if (!empty($course) && array_key_exists('courseNumber', $course)) {
@@ -53,7 +51,8 @@ function unh_d1_client_courseIsAvailable($course = NULL) {
     if (!empty($sections)) {
       foreach($sections as $section) {
         if (unh_d1_client_sectionIsAvailable($section) ||
-          unh_d1_client_sectionIsWaitlisted($section)
+          unh_d1_client_sectionIsWaitlisted($section) ||
+          unh_d1_client_sectionIsFutureOffering($section)
         ) {
           $ret = TRUE;
           break;

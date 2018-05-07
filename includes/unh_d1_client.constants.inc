@@ -119,7 +119,7 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     'requestCriteria' => [
       'label'  => 'courseSectionSearchCriteria',
       'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
-      'defaults' => array('searchOnlyScheduledCoursesFlag' => true, 'returnOnlyAvailableSectionsFlag' => true),
+      'defaults' => array('searchOnlyScheduledCoursesFlag' => true, 'returnOnlyAvailableSectionsFlag' => FALSE),
       'builder' => array(),
     ],
     'advancedCriteria' => [
