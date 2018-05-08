@@ -68,12 +68,13 @@ function unh_d1_client_searchCourse_courseCode($course_code = '', $programAreas 
       array('courseCode' => $course_code, 'programAreas' => $programAreas), 
       'POST'
     );
-
     // There could be some checking here, but mostly, best effort.
     if ($code == '200') {
-      $course = $result['searchCourseResult']['courseProfiles']['courseProfile'];
-      // Returning at most 1 course. (Don't use _unh_d1_client_idxed_array.)
-      $ret = $course;
+      if (!empty($result['searchCourseResult']['courseProfiles'])) {
+        $course = $result['searchCourseResult']['courseProfiles']['courseProfile'];
+        // Returning at most 1 course. (Don't use _unh_d1_client_idxed_array.)
+        $ret = $course;
+      }
     }
   }
 

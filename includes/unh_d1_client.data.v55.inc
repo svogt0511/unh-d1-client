@@ -42,25 +42,35 @@
  *   - section status is "available" || "waitlist_available".
  * 
  */
-function unh_d1_client_courseIsAvailable($course_code = '', $program_area = array()) {
+function unh_d1_client_courseIsAvailable_courseCode($course_code = '', $program_area = array()) {
   $ret = FALSE;
-  ddl($course_code);
+
   if (!empty($course_code)) {
     $course = unh_d1_client_searchCourse_courseCode($course_code, $program_area);
-    if (!empty($course)) {  
-      
-      if (!empty($course) && array_key_exists('courseNumber', $course)) {
-        $sections = unh_d1_client_searchCourseSections($course['courseNumber']);
-    
-        if (!empty($sections)) {
-          foreach($sections as $section) {
-            if (unh_d1_client_sectionIsAvailable($section) ||
-              unh_d1_client_sectionIsWaitlisted($section) ||
-              unh_d1_client_sectionIsFutureOffering($section)
-            ) {
-              $ret = TRUE;
-              break;
-            }
+
+    if (!empty($course)) {
+      $ret = unh_d1_client_courseIsAvailable($course, $program_area);   
+    }
+  }
+
+  return $ret;
+}
+
+function unh_d1_client_courseIsAvailable($course = NULL, $program_area = array()) {
+  $ret = FALSE;
+
+  if (!empty($course)) {
+    if (array_key_exists('courseNumber', $course)) {
+      $sections = unh_d1_client_searchCourseSections($course['courseNumber']);
+  
+      if (!empty($sections)) {
+        foreach($sections as $section) {
+          if (unh_d1_client_sectionIsAvailable($section) ||
+            unh_d1_client_sectionIsWaitlisted($section) ||
+            unh_d1_client_sectionIsFutureOffering($section)
+          ) {
+            $ret = TRUE;
+            break;
           }
         }
       }
