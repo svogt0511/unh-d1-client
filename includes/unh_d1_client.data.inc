@@ -43,13 +43,11 @@ function unh_d1_client_searchCourse_keyword($keyword = '', $programAreas = array
     if ($code == '200') {
       if (!empty($result['searchCourseResult']['courseProfiles'])) {
         $courses = $result['searchCourseResult']['courseProfiles']['courseProfile'];
-        ddl($result, '$result');
         $ret = _unh_d1_client_idxed_array($courses);
       }
     }
   }
-  ddl($keyword, '$keyword');
-  ddl($ret, '$ret');
+
   return $ret;
 }
 
@@ -119,13 +117,20 @@ function unh_d1_client_searchCourse_programAreas($programAreas = array(), $infor
  *
  * @todo - make a loop to get paged results.
  */
-function unh_d1_client_searchCourseSections($course_code = '', $programAreas = array(), $information_level = 'short') {
+function unh_d1_client_searchCourseSections($course_code = '', $programAreas = array(), $information_level = 'short', $flags = array()) {
   $ret = array();
   
   if (!empty($course_code)) {
     $options = array('informationLevel'  =>  $information_level);
+    
     $criteria = array('courseCode' => $course_code, 'programAreas' => $programAreas);
-
+    
+    foreach($flags as $key => $flag) {
+      if (in_array($key, UNH_D1_CLIENT_API_REQUESTS[UNH_D1_CLIENT_SEARCHCOURSESECTION]['requestCriteria'])) {
+        $criteria[$key] = $flag;
+      }
+    }
+    
     list($code, $error, $result) = unh_d1_client_request(
       UNH_D1_CLIENT_SEARCHCOURSESECTION, 
       '', 
@@ -149,15 +154,25 @@ function unh_d1_client_searchCourseSections($course_code = '', $programAreas = a
  *
  * Returns an array of courses.
  */
-function unh_d1_client_searchCourseSection($course_code = '', $custom_section_number = '', $programAreas = array(), $information_level = 'short') {
+function unh_d1_client_searchCourseSection($course_code = '', $custom_section_number = '', $programAreas = array(), $information_level = 'short', $flags = array()) {
   $ret = array();
   
   if (!empty($course_code)) {
+    
     $options = array('informationLevel'  =>  $information_level);
+    
     $criteria = array('courseCode' => $course_code, 'programAreas' => $programAreas);
+    
     if (!empty($custom_section_number)) {
       $criteria['customSectionNumber'] = $custom_section_number;
     }
+    
+    foreach($flags as $key => $flag) {
+      if (in_array($key, UNH_D1_CLIENT_API_REQUESTS[UNH_D1_CLIENT_SEARCHCOURSESECTION]['requestCriteria'])) {
+        $criteria[$key] = $flag;
+      }
+    }
+    
     list($code, $error, $result) = unh_d1_client_request(
       UNH_D1_CLIENT_SEARCHCOURSESECTION, 
       '', 
