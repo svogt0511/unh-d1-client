@@ -178,6 +178,13 @@ define("UNH_D1_CLIENT_SECTION_FULL", "full");
 define("UNH_D1_CLIENT_SECTION_FUTURE_OFFERING", "future_offering");
 define("UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED", "enrollment_closed");
 
+/**
+ * SECTIONS: valid 'action' values for sections.
+ */
+
+define("UNH_D1_CLIENT_SECTION_ACTION_REQUEST_INFO", "request_information");
+
+
 
 /**
  * TIME CONSTANTS.

@@ -552,7 +552,7 @@ function unh_d1_client_getsectionObjectId($section = NULL) {
  * Returns a DateTime object.
  *
  */
-function unh_d1_client_getSectionPvEnrollmentBeginDate($section = NULL) {
+function unh_d1_client_getSectionEnrollmentBeginDate($section = NULL) {
   $ret = NULL;
   if (!empty($section) && array_key_exists('pvEnrollmentBeginDate', $section)) {
     $ret = new DateTime($section['pvEnrollmentBeginDate']);
@@ -567,7 +567,7 @@ function unh_d1_client_getSectionPvEnrollmentBeginDate($section = NULL) {
  * Returns a DateTime object.
  *
  */
-function unh_d1_client_getSectionPvEnrollmentEndDate($section = NULL) {
+function unh_d1_client_getSectionEnrollmentEndDate($section = NULL) {
   $ret = NULL;
   if (!empty($section) && array_key_exists('pvEnrollmentEndDate', $section)) {
     $ret = new DateTime($section['pvEnrollmentEndDate']);
