@@ -132,7 +132,7 @@ const UNH_D1_CLIENT_API_REQUESTS = [
   UNH_D1_CLIENT_SEARCHCOURSESECTION => [
     'opts' => [
       'params' => array('informationLevel', 'locale','_type'),
-      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
+      'defaults' => array('informationLevel' => 'full','_type' => 'json'),
      ],
     'base' => [
       'label' => '',

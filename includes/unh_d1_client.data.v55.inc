@@ -61,13 +61,14 @@ function unh_d1_client_courseIsAvailable($course = NULL, $program_area = array()
 
   if (!empty($course)) {
     if (array_key_exists('courseNumber', $course)) {
-      $sections = unh_d1_client_searchCourseSections($course['courseNumber']);
-  
+      $sections = unh_d1_client_searchCourseSections($course['courseNumber'], $program_area, 'full');
+
       if (!empty($sections)) {
         foreach($sections as $section) {
           if (unh_d1_client_sectionIsAvailable($section) ||
             unh_d1_client_sectionIsWaitlisted($section) ||
-            unh_d1_client_sectionIsFutureOffering($section)
+            unh_d1_client_sectionIsFutureOffering($section) ||
+            unh_d1_client_sectionIsEnrollmentClosed($section)
           ) {
             $ret = TRUE;
             break;
@@ -81,6 +82,59 @@ function unh_d1_client_courseIsAvailable($course = NULL, $program_area = array()
 }
 
 /**
+ * Given a section, returns the whether it is within the enrollment period.
+ */
+function unh_d1_client_sectionWithinEnrollmentPeriod($section = NULL) {
+  $ret = FALSE;
+  
+  $now = new DateTime('now');  
+  if (!empty($section)) {
+    if (($now >= unh_d1_client_getSectionEnrollmentBeginDate($section)) && 
+      ($now <= unh_d1_client_getSectionEnrollmentEndDate($section)))
+    {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+
+/**
+ * Given a section, returns the whether it is before the enrollment period.
+ */
+function unh_d1_client_sectionPreEnrollmentPeriod($section = NULL) {
+  $ret = FALSE;
+  
+  $now = new DateTime('now');  
+  if (!empty($section)) {
+    if ($now < unh_d1_client_getSectionEnrollmentBeginDate($section)) {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+/**
+ * Given a section, returns the whether it is after the enrollment period.
+ */
+function unh_d1_client_sectionPostEnrollmentPeriod($section = NULL) {
+  $ret = FALSE;
+  
+  $now = new DateTime('now');  
+  if (!empty($section)) {
+    if ($now > unh_d1_client_getSectionEnrollmentEndDate($section)) {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+
+
+/**
  * Given a section, returns the section availability (TRUE OR FALSE).
  *
  * @todo: set to return true/false depending on if API version is 5.4 or 5.5
@@ -89,7 +143,10 @@ function unh_d1_client_sectionIsAvailable($section = NULL) {
   $ret = FALSE;
   
   if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_AVAILABLE) {
+    if (unh_d1_client_sectionWithinEnrollmentPeriod($section) &&
+      (($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_AVAILABLE) ||
+      ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_FUTURE_OFFERING)))
+    {
       $ret = TRUE;
     }
   }
@@ -134,9 +191,12 @@ function unh_d1_client_sectionIsWaitlisted($section = NULL) {
  */
 function unh_d1_client_sectionIsFutureOffering($section = NULL) {
   $ret = FALSE;
-  
+
+  $now = new DateTime('now');  
   if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_FUTURE_OFFERING) {
+    if (unh_d1_client_sectionPreEnrollmentPeriod($section) &&
+       ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_FUTURE_OFFERING)) 
+    {
       $ret = TRUE;
     }
   }
@@ -161,15 +221,19 @@ function unh_d1_client_sectionIsFull($section = NULL) {
 }
 
 /**
- * Given a section, returns the section is waitlisted (TRUE OR FALSE).
+ * Given a section, returns the section enrollment is closed (TRUE OR FALSE).
  * 
  * @todo: check dates, as well as status.
  */
 function unh_d1_client_sectionIsEnrollmentClosed($section = NULL) {
   $ret = FALSE;
   
+  $now = new DateTime('now');    
   if (!empty($section) && array_key_exists('sectionAvailabilityCode', $section)) {
-    if ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED) {
+    if ((unh_d1_client_sectionPostEnrollmentPeriod($section) &&
+      ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED)) ||
+      ($section['sectionAvailabilityCode'] == UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED))
+    {
       $ret = TRUE;
     }
   }
