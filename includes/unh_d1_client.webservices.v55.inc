@@ -334,6 +334,32 @@ function _unh_d1_client_build_programAreas($programAreas) {
 
 
 
+function unh_d1_client_get_pagination_response($decoded_result) {
+  $res = NULL;
+  
+  if (array_key_exists('SearchCourseSectionProfileResult', $decoded_result) && array_key_exists('paginationResponse', $decoded_result['SearchCourseSectionProfileResult'])) {
+    $res = $decoded_result['SearchCourseSectionProfileResult']['paginationResponse'];
+  }
+  
+  return $res;
+}
+
+function unh_d1_client_got_full_response($pagination_response) {
+  $res = TRUE;
+  
+  if (!empty($pagination_response)) {
+    if ($pagination_response['totalCount'] > ($pagination_response['pageSize'] * $pagination_response['pageNumber'])) {
+      $res = FALSE;
+    }
+  }
+
+  return $res;
+}
+
+
+
+
+
 
 
 
