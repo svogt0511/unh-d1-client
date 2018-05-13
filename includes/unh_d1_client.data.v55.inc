@@ -49,10 +49,10 @@ function unh_d1_client_courseIsAvailable_courseCode($course_code = '', $program_
     $course = unh_d1_client_searchCourse_courseCode($course_code, $program_area);
 
     if (!empty($course)) {
-      $ret = unh_d1_client_courseIsAvailable($course, $program_area);   
+      $ret = unh_d1_client_courseIsAvailable($course, $program_area);  
     }
   }
-
+  
   return $ret;
 }
 

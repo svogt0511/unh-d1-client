@@ -47,6 +47,7 @@ define("UNH_D1_CLIENT_WEBSERVICE_PATH", "http://unhws.destinysolutions.com/webse
  */
 define("UNH_D1_CLIENT_WEBSVC_RSP_FMT", "json");
 define("UNH_D1_CLIENT_WEBSVC_RQST_FMT", "application/json");
+define("UNH_D1_CLIENT_MAX_PAGE_SIZE", 50);
 
 // methods go here ;'get', 'post'
 
@@ -142,7 +143,8 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     ],
     'requestDetail' => [
       'label' => 'searchCourseSectionProfileRequestDetail',
-      'params' => array(/*'overrideMaxResults',*/ 'pageNumber', 'pageSize'),
+      // 'params' => array(/*'overrideMaxResults',*/ 'pageNumber', 'pageSize'),
+      'params' => array(/*'overrideMaxResults',*/ 'paginationConstruct'),
       'defaults' => array(/*'overrideMaxResults' => true*/),
       'builder' => array(),
     ],

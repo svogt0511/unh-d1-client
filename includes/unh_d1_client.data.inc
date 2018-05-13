@@ -120,30 +120,46 @@ function unh_d1_client_searchCourse_programAreas($programAreas = array(), $infor
  */
 function unh_d1_client_searchCourseSections($course_code = '', $programAreas = array(), $information_level = 'short', $flags = array()) {
   $ret = array();
-  
+    
   if (!empty($course_code)) {
-    $options = array('informationLevel'  =>  $information_level);
-    
-    $criteria = array('courseCode' => $course_code, 'programAreas' => $programAreas);
-    
-    foreach($flags as $key => $flag) {
-      if (in_array($key, UNH_D1_CLIENT_API_REQUESTS[UNH_D1_CLIENT_SEARCHCOURSESECTION]['requestCriteria'])) {
-        $criteria[$key] = $flag;
-      }
-    }
-    
-    list($code, $error, $result) = unh_d1_client_request(
-      UNH_D1_CLIENT_SEARCHCOURSESECTION, 
-      '', 
-      $options, 
-      $criteria, 
-      'POST'
-    );
+    $more_to_get = TRUE;
+    $i = 1;
 
-    // There could be some checking here, but mostly, best effort.
-    if ($code == '200') {
-      $sections = $result['SearchCourseSectionProfileResult']['courseSectionProfiles']['courseSectionProfile'];
-      $ret = _unh_d1_client_idxed_array($sections);
+    while ($more_to_get) {
+      $options = array('informationLevel'  =>  $information_level);
+      $criteria = array('courseCode' => $course_code, 'programAreas' => $programAreas, 'paginationConstruct' => ['pageNumber' => $i, 'pageSize' => UNH_D1_CLIENT_MAX_PAGE_SIZE]);
+    
+      foreach($flags as $key => $flag) {
+        if (in_array($key, UNH_D1_CLIENT_API_REQUESTS[UNH_D1_CLIENT_SEARCHCOURSESECTION]['requestCriteria'])) {
+          $criteria[$key] = $flag;
+        }
+      }
+    
+      //list($code, $error, $result) = unh_d1_client_request_full(
+      list($code, $error, $result) = unh_d1_client_request(
+        UNH_D1_CLIENT_SEARCHCOURSESECTION, 
+        '', 
+        $options, 
+        $criteria, 
+        'POST'
+      );
+
+      // There could be some checking here, but mostly, best effort.
+      if ($code == '200') {
+        $sections = $result['SearchCourseSectionProfileResult']['courseSectionProfiles']['courseSectionProfile'];
+        $ret = $ret + _unh_d1_client_idxed_array($sections);
+        $pagination_response = unh_d1_client_get_pagination_response($result);
+        if (unh_d1_client_got_full_response($pagination_response)){
+          $more_to_get = FALSE;
+          break;
+        }
+      // Error
+      } else {
+        $more_to_get = FALSE;
+        break;
+      }
+      
+      $i++;
     }
   }
 
@@ -782,7 +798,10 @@ function unh_d1_client_getCourseSectionFees($section = NULL) {
  */
 function unh_d1_client_getAssociatedSectionFeeTuitionProfiles($courseSectionFee = NULL) {
   $ret = array();
-  if (!empty($courseSectionFee) && array_key_exists('associatedSectionFeeTuitionProfiles', $courseSectionFee)) {
+  if (!empty($courseSectionFee) && 
+    array_key_exists('associatedSectionFeeTuitionProfiles', $courseSectionFee) && 
+    !empty($courseSectionFee['associatedSectionFeeTuitionProfiles'])) 
+  {
     $ret = _unh_d1_client_idxed_array($courseSectionFee['associatedSectionFeeTuitionProfiles']['associatedSectionFeeTuitionProfile']);
   }
   return $ret;
