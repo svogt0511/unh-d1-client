@@ -315,9 +315,9 @@ function unh_d1_client_getCertificates($programArea = '', $information_level = '
     $certificates = _unh_d1_client_idxed_array($certificates);
     
     foreach($certificates as $certificate) {
-      if (unh_d1_client_getCertificateProgramAreaCode($certificate) == $programArea) {
+     // if (unh_d1_client_getCertificateProgramAreaCode($certificate) == $programArea) {
         $ret[] = $certificate;
-      }
+     // }
     }
   }
 
