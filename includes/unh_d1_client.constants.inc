@@ -47,6 +47,7 @@ define("UNH_D1_CLIENT_WEBSERVICE_PATH", "http://unhws.destinysolutions.com/webse
  */
 define("UNH_D1_CLIENT_WEBSVC_RSP_FMT", "json");
 define("UNH_D1_CLIENT_WEBSVC_RQST_FMT", "application/json");
+define("UNH_D1_CLIENT_MAX_PAGE_SIZE", 50);
 
 // methods go here ;'get', 'post'
 
@@ -119,7 +120,7 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     'requestCriteria' => [
       'label'  => 'courseSectionSearchCriteria',
       'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
-      'defaults' => array('searchOnlyScheduledCoursesFlag' => true, 'returnOnlyAvailableSectionsFlag' => FALSE),
+      'defaults' => array('searchOnlyScheduledCoursesFlag' => FALSE, 'returnOnlyAvailableSectionsFlag' => FALSE),
       'builder' => array(),
     ],
     'advancedCriteria' => [
@@ -132,7 +133,7 @@ const UNH_D1_CLIENT_API_REQUESTS = [
   UNH_D1_CLIENT_SEARCHCOURSESECTION => [
     'opts' => [
       'params' => array('informationLevel', 'locale','_type'),
-      'defaults' => array('informationLevel' => 'short','_type' => 'json'),
+      'defaults' => array('informationLevel' => 'full','_type' => 'json'),
      ],
     'base' => [
       'label' => '',
@@ -142,14 +143,15 @@ const UNH_D1_CLIENT_API_REQUESTS = [
     ],
     'requestDetail' => [
       'label' => 'searchCourseSectionProfileRequestDetail',
-      'params' => array(/*'overrideMaxResults',*/ 'pageNumber', 'pageSize'),
+      // 'params' => array(/*'overrideMaxResults',*/ 'pageNumber', 'pageSize'),
+      'params' => array(/*'overrideMaxResults',*/ 'paginationConstruct'),
       'defaults' => array(/*'overrideMaxResults' => true*/),
       'builder' => array(),
     ],
     'requestCriteria' => [
       'label'  => 'courseSectionSearchCriteria',
       'params' => array('keyword', 'courseCode', 'searchOnlyScheduledCoursesFlag', 'returnOnlyAvailableSectionsFlag'),
-      'defaults' => array(),
+      'defaults' => array('searchOnlyScheduledCoursesFlag' => FALSE, 'returnOnlyAvailableSectionsFlag' => FALSE),
       'builder' => array(),
     ],
     'advancedCriteria' => [
@@ -177,6 +179,13 @@ define("UNH_D1_CLIENT_SECTION_WAITLIST_AVAILABLE", "waitlist_available");
 define("UNH_D1_CLIENT_SECTION_FULL", "full");
 define("UNH_D1_CLIENT_SECTION_FUTURE_OFFERING", "future_offering");
 define("UNH_D1_CLIENT_SECTION_ENROLLMENT_CLOSED", "enrollment_closed");
+
+/**
+ * SECTIONS: valid 'action' values for sections.
+ */
+
+define("UNH_D1_CLIENT_SECTION_ACTION_REQUEST_INFO", "request_information");
+
 
 
 /**
