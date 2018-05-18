@@ -111,8 +111,8 @@ function unh_d1_client_menu() {
   );
 
   // Error page - service unavailable
-  $items['unh-d1-service-unavailable'] = array(
-    'title' => t('UNH D1 Service Unavailable'),
+  $items['service-unavailable'] = array(
+    'title' => t('Service Temporarily Unavailable'),
     'description' => 'UNH D1 Client Module - Report that the DestinyOne API is unavailable. (Getting 500 error codes.)',
     'page callback' => 'unh_d1_client_service_unavailable',
     'access callback' => 'user_access',
