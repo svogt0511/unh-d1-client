@@ -59,7 +59,7 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
       // return $result
 
       $error = (int)$result->code;
-      if (($error >= 500) && ($error <=599)) {
+      if ((($error >= 500) && ($error <=599)) || ($error == HTTP_REQUEST_TIMEOUT) || ($result->error == UNH_D1_CLIENT_SERVICE_UNAVAILABLE)) {
         drupal_goto('/service-unavailable');
       }
       
@@ -70,7 +70,8 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
         // ddl("STORING CACHED VALUE!!");
       }
       else {
-        $ret = array($result->code, 'error is: ' . $result->data, NULL);
+        // $ret = array($result->code, 'error is: ' . $result->data, NULL);
+        $ret = array($result->code, $result->error, NULL);
       }
     }
   }
