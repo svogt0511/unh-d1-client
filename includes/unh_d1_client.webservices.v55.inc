@@ -332,9 +332,6 @@ function _unh_d1_client_build_programAreas($programAreas) {
 }
 
 
-
-
-
 function unh_d1_client_get_pagination_response($decoded_result) {
   $res = NULL;
   

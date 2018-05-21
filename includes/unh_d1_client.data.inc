@@ -647,6 +647,22 @@ function unh_d1_client_getsectionInstructionMethod($section = NULL) {
   return $ret;
 }
 
+/**
+ *
+ * Given a section, returns the 'sectionNotes'.
+ * 
+ */
+function unh_d1_client_getsectionNotes($section = NULL) {
+  $ret = '';
+  
+  if (!empty($section) && array_key_exists('sectionNotes', $section)) {
+    $ret = $section['sectionNotes'];
+  }
+  
+  return $ret;
+}
+
+
 
 /******************************************************************************
  *
