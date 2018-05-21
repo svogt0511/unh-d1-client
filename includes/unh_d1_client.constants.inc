@@ -206,3 +206,14 @@ define("UNH_D1_CLIENT_SORT_DESCENDING", 1);
  define("UNH_D1_CLIENT_SERVICE_UNAVAILABLE", "Operation timed out");
 
 
+/**
+ * SECTION INSTRUCTION METHODS - These can be gotten programmatically through baseEntities request.
+ */
+ define("UNH_D1_CLIENT_SECTION_ONLINE", "Online");
+
+/**
+ * SECTION SCHEDULE TYPES
+ */
+ define("UNH_D1_CLIENT_SECTION_SCHEDULE_ONLINE_SELF_PACED", "Online, self-paced");
+  
+

@@ -622,6 +622,32 @@ function unh_d1_client_getSectionPvAvailabilityEndDate($section = NULL) {
 }
 
 
+/**
+ *
+ * Given a section, returns the instruction method.  Assumption is that there is only 1 method of instruction.
+ *
+ * Test courses would be on D1 test server: 
+ *
+ *   Using Technology to Create Online Courses and Presentations(PDT-ComAP-04)
+ *   Animal-Assisted Therapy(DT-SocWk-02)
+ *
+ * d1 prod server:
+ *
+ *   Animal-Assisted Therapy (PDT-SocWk-02)
+ *   Brain-based Basics (PDT-TchGN-32)
+ * 
+ */
+function unh_d1_client_getsectionInstructionMethod($section = NULL) {
+  $ret = '';  
+    
+  if (!empty($section) && array_key_exists('InstructionMethods', $section)) {
+    $ret = $section['InstructionMethods']['instructionMethod']['description'];
+  }
+  
+  return $ret;
+}
+
+
 /******************************************************************************
  *
  * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
@@ -762,6 +788,22 @@ function unh_d1_client_getSectionCampusName($sectionSchedule = NULL) {
 
   if (!empty($sectionSchedule) && array_key_exists('campus', $sectionSchedule)) {
     $ret = $sectionSchedule['campus']['name'];
+  }
+
+  return $ret;
+}
+
+
+/**
+ *
+ * Given a sectionSchedule, returns the schedule type.
+ *
+ */
+function unh_d1_client_getSectionScheduleType($sectionSchedule = NULL) {
+  $ret = '';
+
+  if (!empty($sectionSchedule) && array_key_exists('scheduleType', $sectionSchedule)) {
+    $ret = $sectionSchedule['scheduleType'];
   }
 
   return $ret;
