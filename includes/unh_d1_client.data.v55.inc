@@ -278,6 +278,33 @@ function unh_d1_client_sectionIsOnlineSelfPaced($section = NULL) {
 }
 
 
+/**
+ * Implements legacy call to get the course section profile.
+ *
+ * Returns the array of sections for the course.  Otherwise returns NULL.
+ */
+function unh_d1_client_legacy_getCourseSectionProfile_v55($course_code = '', $information_level = 'full') {
+  $ret = NULL;
 
+  if (!empty($course_code)) {
+    list($code, $error, $result) = unh_d1_client_request(
+      UNH_D1_CLIENT_COURSESECTIONPROFILE, 
+      $course_code, 
+      array('informationLevel'  =>  $information_level), 
+      array(), 
+      'GET'
+    );
+
+    // There could be some checking here, but mostly, best effort.
+    if ($code == '200') {
+      if (!empty($result['courseProfile']['sections'])) {
+        $sections = $result['courseProfile']['sections']['section'];
+        $ret = _unh_d1_client_idxed_array($sections);
+      }
+    }
+  }
+
+  return $ret;
+}
 
 
