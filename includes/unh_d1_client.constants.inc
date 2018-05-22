@@ -21,6 +21,10 @@ define("UNH_D1_CLIENT_VERSION_7X00_alpha0", "7.x.00.0.alpha.0");
 define("UNH_D1_CLIENT_API_VERSION_54", "2");
 define("UNH_D1_CLIENT_API_VERSION_55", "3");
 
+define ("JUGGERNAUT_55", "UNH_5.5.0");
+define ("ICEMAN_54", "");
+define ("API_VERSION_ERROR", "error getting version!");
+
 /**
  * Configuration Form
  */
@@ -59,11 +63,18 @@ define("UNH_D1_CLIENT_MAX_PAGE_SIZE", 50);
  */
 define("UNH_D1_CLIENT_BASEENTITIES", "baseEntities");
 define("UNH_D1_CLIENT_CERTIFICATES", "certificates");
+define("UNH_D1_CLIENT_GETINSTANCEINFORMATION", "getInstanceInformation");
 define("UNH_D1_CLIENT_PROGRAMAREAS", "programAreas");
 define("UNH_D1_CLIENT_SEARCHCOURSE", "searchCourse");
 define("UNH_D1_CLIENT_SEARCHCOURSESECTION", "searchCourseSection");
 define("UNH_D1_CLIENT_SEMESTERS", "semesters");
 
+/**
+ * Webservices requests - v5.4/5.5/5.6 - LEGACY
+ */
+ 
+define("UNH_D1_CLIENT_COURSESECTIONPROFILE", "courseSectionProfile");
+ 
 
 /**
  * Webservices parameters - v5.4/5.5
@@ -166,6 +177,20 @@ const UNH_D1_CLIENT_API_REQUESTS = [
       'params' => array('informationLevel', 'locale', '_type'),
       'defaults' => array('informationLevel' => 'short','_type' => 'json'),
     ],
+  ],
+  // LEGACY
+  UNH_D1_CLIENT_COURSESECTIONPROFILE => [
+    'opts' => [
+      'params' => array('informationLevel', '_type'),
+      'defaults' => array('informationLevel' => 'full','_type' => 'json'),
+    ],
+  ],
+  // API VERSION
+  UNH_D1_CLIENT_GETINSTANCEINFORMATION => [
+    'opts' => [
+      'params' => array(),
+      'defaults' => array('_type' => 'json'),
+    ],
   ]
 ];
 
@@ -205,4 +230,15 @@ define("UNH_D1_CLIENT_SORT_DESCENDING", 1);
  */
  define("UNH_D1_CLIENT_SERVICE_UNAVAILABLE", "Operation timed out");
 
+
+/**
+ * SECTION INSTRUCTION METHODS - These can be gotten programmatically through baseEntities request.
+ */
+ define("UNH_D1_CLIENT_SECTION_ONLINE", "Online");
+
+/**
+ * SECTION SCHEDULE TYPES
+ */
+ define("UNH_D1_CLIENT_SECTION_SCHEDULE_ONLINE_SELF_PACED", "Online, self-paced");
+  
 
