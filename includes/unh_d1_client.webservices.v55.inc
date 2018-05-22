@@ -28,10 +28,11 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
   );
 
   if (array_key_exists($request, UNH_D1_CLIENT_API_REQUESTS)) {
+  
     $url_opts = _unh_d1_client_build_request_opts($request, $options);
 
-    // Set url.
-    $url = variable_get('unh_d1_client_webservice_path') . (!empty($request) ? '/' . $request : '') . (!empty($baseEntity) ? '/' . $baseEntity : '');
+    // Set url. Don't allow '/' character to be part of the course code (which is used as the base entity in the url path).
+    $url = variable_get('unh_d1_client_webservice_path') . (!empty($request) ? '/' . $request : '') . (!empty($baseEntity) ? '/' . trim($baseEntity) : '');
     $url .= (!empty($url_opts) ? '?' . drupal_http_build_query($url_opts) : '');
     
     // Set header(s)/body opts.
@@ -57,6 +58,9 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
       $result = drupal_http_request($url, $opts);
       // Check for service unavailable and forward to appropriate page. Otherwise, just
       // return $result
+      // ddl($result, '$result - MAKING REQUEST');
+      // ddl($url, '$url - MAKING REQUEST');
+      // ddl($opts, '$opts - MAKING REQUEST');
 
       $error = (int)$result->code;
       if ((($error >= 500) && ($error <=599)) || ($error == HTTP_REQUEST_TIMEOUT) || ($result->error == UNH_D1_CLIENT_SERVICE_UNAVAILABLE)) {
@@ -330,9 +334,6 @@ function _unh_d1_client_build_programAreas($programAreas) {
 
   return $ret;
 }
-
-
-
 
 
 function unh_d1_client_get_pagination_response($decoded_result) {

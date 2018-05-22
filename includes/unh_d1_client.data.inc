@@ -324,6 +324,37 @@ function unh_d1_client_getCertificates($programArea = '', $information_level = '
   return $ret;
 }
 
+
+/**
+ * Returns the API verson.
+ *
+ */
+function unh_d1_client_getInstanceInformation() {
+  $ret = '';
+  
+  $options = array();
+  $criteria = array();
+  list($code, $error, $result) = unh_d1_client_request(
+    UNH_D1_CLIENT_GETINSTANCEINFORMATION, 
+    '', 
+    $options, 
+    $criteria, 
+    'GET'
+  );
+  
+  // There could be some checking here, but mostly, best effort.
+  if ($code == '200') {
+    if(array_key_exists('GetInstanceInformationResult', $result)) {
+      $ret = $result['GetInstanceInformationResult']['version'];
+    }
+  } else {
+    $ret = API_VERSION_ERROR;
+  }
+
+  return $ret;
+}
+
+
 /******************************************************************************
  *
  * Functions to extract data from CERTIFICATE objects obtained from the API.
@@ -622,6 +653,65 @@ function unh_d1_client_getSectionPvAvailabilityEndDate($section = NULL) {
 }
 
 
+/**
+ *
+ * Given a section, returns the instruction method.  Assumption is that there is only 1 method of instruction.
+ *
+ * Test courses would be on D1 test server: 
+ *
+ *   Using Technology to Create Online Courses and Presentations(PDT-ComAP-04)
+ *   Animal-Assisted Therapy(DT-SocWk-02)
+ *
+ * d1 prod server:
+ *
+ *   Animal-Assisted Therapy (PDT-SocWk-02)
+ *   Brain-based Basics (PDT-TchGN-32)
+ * 
+ */
+function unh_d1_client_getsectionInstructionMethod($section = NULL) {
+  $ret = '';  
+    
+  if (!empty($section) && array_key_exists('InstructionMethods', $section)) {
+    $ret = $section['InstructionMethods']['instructionMethod']['description'];
+  }
+  
+  return $ret;
+}
+
+/**
+ *
+ * Given a section, returns the 'sectionNotes'.
+ * 
+ */
+function unh_d1_client_getsectionNotes($section = NULL) {
+  $ret = '';
+
+  if (!empty($section) && array_key_exists('sectionNotes', $section)) {
+    $ret = $section['sectionNotes'];    
+  }
+  
+  // Try a legacy call to get section notes.
+  $api_version = unh_d1_client_getInstanceInformation();
+  if ((($api_version == JUGGERNAUT_55) || ($api_version == ICEMAN_54)) &&
+    function_exists(unh_d1_client_legacy_getCourseSectionProfile_v55)) {
+    $course_code = unh_d1_client_getSectionAssocCourseNumber($section);
+    if (!empty($course_code)) {
+      $sections = unh_d1_client_legacy_getCourseSectionProfile_v55($course_code);
+      $sectionObjId = unh_d1_client_getSectionObjectId($section);
+      if (!empty($sections) && !empty($sectionObjId)) {
+        $key = array_search($sectionObjId, unh_d1_client_getSectionArrayObjectIds($sections));
+        if (!($key === FALSE)) {
+          $ret = (!empty($sections[$key]['sectionNotes']) ? $sections[$key]['sectionNotes'] : '');
+        }
+      }
+    }
+  }
+  
+  return $ret;
+}
+
+
+
 /******************************************************************************
  *
  * Functions to extract data from SECTION SCHEDULE objects obtained from the API.
@@ -762,6 +852,22 @@ function unh_d1_client_getSectionCampusName($sectionSchedule = NULL) {
 
   if (!empty($sectionSchedule) && array_key_exists('campus', $sectionSchedule)) {
     $ret = $sectionSchedule['campus']['name'];
+  }
+
+  return $ret;
+}
+
+
+/**
+ *
+ * Given a sectionSchedule, returns the schedule type.
+ *
+ */
+function unh_d1_client_getSectionScheduleType($sectionSchedule = NULL) {
+  $ret = '';
+
+  if (!empty($sectionSchedule) && array_key_exists('scheduleType', $sectionSchedule)) {
+    $ret = $sectionSchedule['scheduleType'];
   }
 
   return $ret;
@@ -954,6 +1060,19 @@ function unh_d1_client_getSectionAssocCourseObjectId($section = NULL) {
 }
 
 
+/**
+ *
+ * Given a section, returns the 'associatedCourse' objectId.
+ *
+ */
+function unh_d1_client_getSectionAssocCourseNumber($section = NULL) {
+  $ret = NULL;
+  if (!empty($section) && array_key_exists('associatedCourse', $section)) {
+    $ret = $section['associatedCourse']['courseNumber'];
+  }
+  return $ret;
+}
+
 
 /******************************************************************************
  *
@@ -992,4 +1111,5 @@ function unh_d1_client_get_notify_me_url($courseObjID, $sectionNumber) {
 }
 */
  
-
+ 
+ 
