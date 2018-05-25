@@ -584,10 +584,24 @@ function unh_d1_client_getsectionSemester($section = '') {
  * 
  */
 function unh_d1_client_getsectionObjectId($section = NULL) {
-  $ret = null;
+  $ret = '';
   
   if (!empty($section) && array_key_exists('objectId', $section)) {
     $ret = $section['objectId'];
+  }
+  return $ret;
+}
+
+/**
+ *
+ * Given a section, returns the 'code'.
+ * 
+ */
+function unh_d1_client_getsectionCode($section = NULL) {
+  $ret = '';
+  
+  if (!empty($section) && array_key_exists('code', $section)) {
+    $ret = $section['code'];
   }
   return $ret;
 }
