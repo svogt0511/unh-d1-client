@@ -179,3 +179,163 @@ function unh_d1_client_sectionIsEnrollmentClosed($section = NULL) {
   
   return $ret;
 }
+
+/****************************************************************************/
+
+/**
+ * @file
+ *
+ * @todo: Update this docblock.
+ * @todo: make sure we get full output on other than 'short' informationLevel
+ *
+ * Functions/'methods' get data from D1 using the web services.
+ * For ex, get lists of things like: course lists, section lists, etc.
+ *
+ * Also functions/'methods' for getting information from the data structures
+ * returned from D1, like determining course status, section status, etc.
+ */
+
+/******************************************************************************
+ *
+ * Functions to extract data of interest from the API.
+ *
+ ******************************************************************************/
+
+
+/******************************************************************************
+ *
+ * Functions to determine STATUSES of various data objects returned by the API.
+ *
+ * This is the 5.5 version.
+ *
+ ******************************************************************************/
+
+
+
+/**
+ * Given a section, returns the whether it is within the enrollment period.
+ */
+function unh_d1_client_sectionWithinEnrollmentPeriod($section = NULL) {
+  $ret = FALSE;
+  
+  $now = new DateTime('now');  
+  if (!empty($section)) {
+    if (($now >= unh_d1_client_getSectionEnrollmentBeginDate($section)) && 
+      ($now <= unh_d1_client_getSectionEnrollmentEndDate($section)))
+    {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+
+/**
+ * Given a section, returns the whether it is before the enrollment period.
+ */
+function unh_d1_client_sectionPreEnrollmentPeriod($section = NULL) {
+  $ret = FALSE;
+  
+  $now = new DateTime('now');  
+  if (!empty($section)) {
+    if ($now < unh_d1_client_getSectionEnrollmentBeginDate($section)) {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+/**
+ * Given a section, returns the whether it is after the enrollment period.
+ */
+function unh_d1_client_sectionPostEnrollmentPeriod($section = NULL) {
+  $ret = FALSE;
+  
+  $now = new DateTime('now');  
+  if (!empty($section)) {
+    if ($now > unh_d1_client_getSectionEnrollmentEndDate($section)) {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+
+
+/**
+ * Given a section, returns whether the section is online (TRUE OR FALSE).
+ *
+ */
+function unh_d1_client_sectionIsOnline($section = NULL) {
+  $ret = FALSE;
+  
+  if (!empty($section)) {
+    if (unh_d1_client_getsectionInstructionMethod($section) == UNH_D1_CLIENT_SECTION_ONLINE) {
+      $ret = TRUE;
+    }
+  }
+  
+  return $ret;
+}
+
+/**
+ * Given a section, returns whether the section is online, self-paced (TRUE OR FALSE).
+ *
+ */
+function unh_d1_client_sectionIsOnlineSelfPaced($section = NULL) {
+  $ret = FALSE;
+  
+  if (!empty($section)) {
+    if (unh_d1_client_sectionIsOnline($section)) {
+      $section_schedules = unh_d1_client_getSectionSchedules($section);
+      if (!empty($section_schedules)) {
+        if (unh_d1_client_getSectionScheduleType($section_schedules[0]) == UNH_D1_CLIENT_SECTION_SCHEDULE_ONLINE_SELF_PACED) {
+          $ret = TRUE;
+        }
+      } 
+    }
+  }
+  return $ret;
+}
+
+
+/**
+ * Implements legacy call to get the course section profile.
+ *
+ * Returns the array of sections for the course.  Otherwise returns NULL.
+ */
+function unh_d1_client_legacy_getCourseSectionProfile_v55($course_code = '', $information_level = 'full') {
+  $ret = NULL;
+
+  if (!empty($course_code)) {
+    list($code, $error, $result) = unh_d1_client_request(
+      UNH_D1_CLIENT_COURSESECTIONPROFILE, 
+      $course_code, 
+      array('informationLevel'  =>  $information_level), 
+      array(), 
+      'GET'
+    );
+
+    // There could be some checking here, but mostly, best effort.
+    if ($code == '200') {
+      if (!empty($result['courseProfile']['sections'])) {
+        $sections = $result['courseProfile']['sections']['section'];
+        $ret = _unh_d1_client_idxed_array($sections);
+      }
+    }
+  }
+
+  return $ret;
+}
+
+
+
+
+
+
+
+
+
