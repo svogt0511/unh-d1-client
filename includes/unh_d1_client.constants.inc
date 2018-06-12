@@ -228,7 +228,9 @@ define("UNH_D1_CLIENT_SORT_DESCENDING", 1);
 /**
  * DRUPAL_HTTP_REQUEST ERRORS
  */
- define("UNH_D1_CLIENT_SERVICE_UNAVAILABLE", "Operation timed out");
+define("UNH_D1_CLIENT_GENERIC_ERROR", "Some kind of error occurred preventing a successful webservice request.");
+define("UNH_D1_CLIENT_SERVICE_UNAVAILABLE", "Operation timed out");
+
 
 
 /**
