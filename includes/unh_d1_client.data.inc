@@ -707,7 +707,7 @@ function unh_d1_client_getsectionNotes($section = NULL) {
   // Try a legacy call to get section notes.
   $api_version = unh_d1_client_getInstanceInformation();
   if ((($api_version == JUGGERNAUT_55) || ($api_version == ICEMAN_54)) &&
-    function_exists(unh_d1_client_legacy_getCourseSectionProfile_v55)) {
+    function_exists('unh_d1_client_legacy_getCourseSectionProfile_v55')) {
     $course_code = unh_d1_client_getSectionAssocCourseNumber($section);
     if (!empty($course_code)) {
       $sections = unh_d1_client_legacy_getCourseSectionProfile_v55($course_code);
