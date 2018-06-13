@@ -1003,6 +1003,7 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
   if (!empty($section)) {
     $course_section_fees = unh_d1_client_getCourseSectionFees($section);
     if (!empty($course_section_fees)) {
+
       // Assuming only 1.
       $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fees[0]);
     
@@ -1011,28 +1012,36 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
         $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($profile);
        
         // This is it!!!!!!
-        if (!empty($associated_tuition_profile)) {
-        
+        if (!empty($associated_tuition_profile) && 
+          ($associated_tuition_profile['objectStatusCode'] == 'active') &&
+          ($associated_tuition_profile['publicApplicable'] == 'true'))
+        {
+
           $tuition_fees = unh_d1_client_getTuitionFees($associated_tuition_profile);
-          
           foreach($tuition_fees as $tuition_fee) {
             $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fee);
             
             $items = [];
             foreach($tuition_fee_items as $tuition_fee_item) {
-              $item['amount'] = $tuition_fee_item['amount'];
-              $item['discountable'] = $tuition_fee_item['discountable'];
-              $items[] = $item;
+              if(array_key_exists('amount', $tuition_fee_item) && !empty($tuition_fee_item['amount'])) {
+                $item['amount'] = $tuition_fee_item['amount'];
+                $item['discountable'] = $tuition_fee_item['discountable'];
+                $items[] = $item;
+              }
             }
-            $tuition['items'] = $items;
-            $tuition['published_code'] = $tuition_fee['printCode'];
-            $tuition_info[] = $tuition;
+            if (!empty($items)) {
+              $tuition['items'] = $items;
+              $tuition['published_code'] = '';
+              if (array_key_exists('printCode', $tuition_fee)) {
+                $tuition['published_code'] = $tuition_fee['printCode'];
+              }
+              $tuition_info[] = $tuition;
+            }
           }
-           $ret = $tuition_info;
         }
-        // This is it!!!!!!
-        
-      }  
+        // This is it!!!!!!       
+      }
+      $ret = $tuition_info;  
     }
   }
   
