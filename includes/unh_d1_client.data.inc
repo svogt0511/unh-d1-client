@@ -485,8 +485,7 @@ function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
  */
 function unh_d1_client_getsectionDiscounts($section = NULL) {
   $ret = array();
-  
-  if (!empty($section) && array_key_exists('discounts', $section)) {
+  if (!empty($section) && array_key_exists('discounts', $section) && !empty($section['discounts'])) {
     $ret = _unh_d1_client_idxed_array($section['discounts']['discount']);
   }
   
@@ -707,7 +706,7 @@ function unh_d1_client_getsectionNotes($section = NULL) {
   // Try a legacy call to get section notes.
   $api_version = unh_d1_client_getInstanceInformation();
   if ((($api_version == JUGGERNAUT_55) || ($api_version == ICEMAN_54)) &&
-    function_exists(unh_d1_client_legacy_getCourseSectionProfile_v55)) {
+    function_exists('unh_d1_client_legacy_getCourseSectionProfile_v55')) {
     $course_code = unh_d1_client_getSectionAssocCourseNumber($section);
     if (!empty($course_code)) {
       $sections = unh_d1_client_legacy_getCourseSectionProfile_v55($course_code);
@@ -1003,6 +1002,7 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
   if (!empty($section)) {
     $course_section_fees = unh_d1_client_getCourseSectionFees($section);
     if (!empty($course_section_fees)) {
+
       // Assuming only 1.
       $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fees[0]);
     
@@ -1011,28 +1011,36 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
         $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($profile);
        
         // This is it!!!!!!
-        if (!empty($associated_tuition_profile)) {
-        
+        if (!empty($associated_tuition_profile) && 
+          ($associated_tuition_profile['objectStatusCode'] == 'active') &&
+          ($associated_tuition_profile['publicApplicable'] == 'true'))
+        {
+
           $tuition_fees = unh_d1_client_getTuitionFees($associated_tuition_profile);
-          
           foreach($tuition_fees as $tuition_fee) {
             $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fee);
             
             $items = [];
             foreach($tuition_fee_items as $tuition_fee_item) {
-              $item['amount'] = $tuition_fee_item['amount'];
-              $item['discountable'] = $tuition_fee_item['discountable'];
-              $items[] = $item;
+              if(array_key_exists('amount', $tuition_fee_item) && !empty($tuition_fee_item['amount'])) {
+                $item['amount'] = $tuition_fee_item['amount'];
+                $item['discountable'] = $tuition_fee_item['discountable'];
+                $items[] = $item;
+              }
             }
-            $tuition['items'] = $items;
-            $tuition['published_code'] = $tuition_fee['printCode'];
-            $tuition_info[] = $tuition;
+            if (!empty($items)) {
+              $tuition['items'] = $items;
+              $tuition['published_code'] = '';
+              if (array_key_exists('printCode', $tuition_fee)) {
+                $tuition['published_code'] = $tuition_fee['printCode'];
+              }
+              $tuition_info[] = $tuition;
+            }
           }
-           $ret = $tuition_info;
         }
-        // This is it!!!!!!
-        
-      }  
+        // This is it!!!!!!       
+      }
+      $ret = $tuition_info;  
     }
   }
   
