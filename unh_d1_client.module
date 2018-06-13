@@ -25,7 +25,7 @@
  *
  * The functions here are implemented via drupal_http_request:
  *
- *    https://api.drupal.org/api/drupal/includes%21common.inc/function/drupal_http_request/7.x
+ *    https://api.drupal.org/api/drupal/includes/common.inc/function/drupal_http_request/7.x
  *
  * Pertinent D1 documentation is:
  *

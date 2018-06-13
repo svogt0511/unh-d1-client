@@ -18,7 +18,6 @@
 /**
  * Implements a webservice request.
  *
- * @todo: process the error returns
  */
 function unh_d1_client_request($request = '', $baseEntity = '', $options = array(), $criteria = array(), $method = 'GET') {
   $ret = array(
@@ -62,8 +61,14 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
       // ddl($url, '$url - MAKING REQUEST');
       // ddl($opts, '$opts - MAKING REQUEST');
 
-      $error = (int)$result->code;
-      if ((($error >= 500) && ($error <=599)) || ($error == HTTP_REQUEST_TIMEOUT) || ($result->error == UNH_D1_CLIENT_SERVICE_UNAVAILABLE)) {
+      $code = (int)$result->code;
+      if ((($code >= 500) && ($code <=599)) || 
+        ($code == HTTP_REQUEST_TIMEOUT))
+        // ($code == HTTP_REQUEST_TIMEOUT) || 
+        // (property_exists($result, 'error') && 
+        // isset($result->error) && 
+        // ($result->error == UNH_D1_CLIENT_SERVICE_UNAVAILABLE))
+      {
         drupal_goto('/service-unavailable');
       }
       
@@ -74,8 +79,12 @@ function unh_d1_client_request($request = '', $baseEntity = '', $options = array
         // ddl("STORING CACHED VALUE!!");
       }
       else {
+        $msg = UNH_D1_CLIENT_GENERIC_ERROR;
+        if (property_exists($result, 'error') && isset($result->error)) {
+          $msg = $result->error;
+        }
         // $ret = array($result->code, 'error is: ' . $result->data, NULL);
-        $ret = array($result->code, $result->error, NULL);
+        $ret = array($result->code, $msg, NULL);
       }
     }
   }
