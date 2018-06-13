@@ -485,8 +485,7 @@ function unh_d1_client_getsectionCustomSectionNumber($section = NULL) {
  */
 function unh_d1_client_getsectionDiscounts($section = NULL) {
   $ret = array();
-  
-  if (!empty($section) && array_key_exists('discounts', $section)) {
+  if (!empty($section) && array_key_exists('discounts', $section) && !empty($section['discounts'])) {
     $ret = _unh_d1_client_idxed_array($section['discounts']['discount']);
   }
   
