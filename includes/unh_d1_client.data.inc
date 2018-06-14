@@ -928,6 +928,23 @@ function unh_d1_client_getAssociatedSectionFeeTuitionProfiles($courseSectionFee 
 
 /**
  *
+ * Given a courseSectionFee object, returns an array of 'associatedSectionFeeTuitionProfiles' (for flat fee enabled tuition profiles.)
+ *
+ */
+function unh_d1_client_getFlatFeeSectionTuitionProfiles($courseSectionFee = NULL) {
+  $ret = array();
+  if (!empty($courseSectionFee) && 
+    array_key_exists('flatFeeTuitionProfile', $courseSectionFee) && 
+    !empty($courseSectionFee['flatFeeTuitionProfile'])) 
+  {
+    $ret = _unh_d1_client_idxed_array($courseSectionFee['flatFeeTuitionProfile']);
+  }
+  return $ret;
+}
+
+
+/**
+ *
  * Given an associatedSectionFeeTuitionProfiles object, returns an 'associatedTuitionProfile'.
  *
  * 1 of these each with published code.
@@ -998,14 +1015,21 @@ function unh_d1_client_getTuitionFeeItems($tuitionFee = NULL) {
  */
 function unh_d1_client_getSectionTuitionInfo($section = array()) {
   $ret = array();
-  
+
   if (!empty($section)) {
+    
     $course_section_fees = unh_d1_client_getCourseSectionFees($section);
     if (!empty($course_section_fees)) {
-
-      // Assuming only 1.
-      $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fees[0]);
     
+      // get associatedSectionFeeTuitionProfiles - may be 'flat fee' or a set of 'section fees'.
+      $course_section_fee = $course_section_fees[0];
+      $associated_section_fee_tuition_profiles = [];
+      if ($course_section_fee['tuitionProfileEnabled']) {
+        $associated_section_fee_tuition_profiles = unh_d1_client_getAssociatedSectionFeeTuitionProfiles($course_section_fee);
+      } elseif ($course_section_fee['flatFeeEnabled']) {
+        $associated_section_fee_tuition_profiles = unh_d1_client_getFlatFeeSectionTuitionProfiles($course_section_fee);
+      }
+      
       $tuition_info = [];
       foreach($associated_section_fee_tuition_profiles as $profile) {
         $associated_tuition_profile = unh_d1_client_getAssociatedTuitionProfile($profile);
@@ -1019,7 +1043,6 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
           $tuition_fees = unh_d1_client_getTuitionFees($associated_tuition_profile);
           foreach($tuition_fees as $tuition_fee) {
             $tuition_fee_items = unh_d1_client_getTuitionFeeItems($tuition_fee);
-            
             $items = [];
             foreach($tuition_fee_items as $tuition_fee_item) {
               if(array_key_exists('amount', $tuition_fee_item) && !empty($tuition_fee_item['amount'])) {
@@ -1040,7 +1063,8 @@ function unh_d1_client_getSectionTuitionInfo($section = array()) {
         }
         // This is it!!!!!!       
       }
-      $ret = $tuition_info;  
+      $ret = $tuition_info;
+       
     }
   }
   
