@@ -30,12 +30,21 @@
 function unh_d1_client_searchCourse_keyword($keyword = '', $programAreas = array(), $information_level = 'short') {
   $ret = array();
   
-  if (!empty($keyword)) {
+  if ($keyword == 'all' || !empty($keyword)) {
+    $options = array('informationLevel'  =>  $information_level);
+ 
+    $criteria = array('keyword' => $keyword, 'programAreas' => $programAreas);
+    if ($keyword == 'all') {
+      $criteria = array('programAreas' => $programAreas);
+    }
+        
     list($code, $error, $result) = unh_d1_client_request(
       UNH_D1_CLIENT_SEARCHCOURSE, 
       '', 
-      array('informationLevel'  =>  $information_level), 
-      array('keyword' => $keyword, 'programAreas' => $programAreas), 
+      $options,
+      //array('informationLevel'  =>  $information_level),
+      $criteria,
+      //array('keyword' => $keyword, 'programAreas' => $programAreas), 
       'POST'
     );
     
@@ -441,6 +450,25 @@ function unh_d1_client_getcourseObjectId($course = NULL) {
   
   return $ret;
 }
+
+
+
+/**
+ *
+ * Given an array of courses, returns an array of their 'names's (titles).
+ *
+ */
+function unh_d1_client_getCourseArrayTitles($courses = array()) {
+  $ret = array();
+  if (!empty($courses)) {
+    $ret = array_column($courses, 'name');
+    if (empty($ret)) {
+      $ret = array_column($courses, 'courseTitle');
+    }
+  }
+  return $ret;
+}
+
 
 
 /******************************************************************************
@@ -1146,6 +1174,12 @@ function unh_d1_client_get_request_more_info_url($section) {
   return 'https://' . unh_d1_client_settings_public_domain() . '/public/student/studentRequestInformation.do?method=edit&type=0&notify=section&courseNumber=' . unh_d1_client_getSectionAssocCourseObjectId($section);
 }
 
+//UTIL: Returns the enrollment url.  The actual url should be a module parameter.
+function unh_d1_client_get_d1_url($course) {
+  // https://learnforlife.unh.edu/search/publicCourseSearchDetails.do?method=load&courseId=22520
+  return 'https://' . unh_d1_client_settings_public_domain() . '/search/publicCourseSearchDetails.do?method=load&courseId=' . unh_d1_client_getcourseObjectId($course);
+}
+
 /*
 //UTIL: Returns the notify me url.  The actual url should be a module parameter.
 function unh_d1_client_get_notify_me_url($courseObjID, $sectionNumber) {
@@ -1156,6 +1190,3 @@ function unh_d1_client_get_notify_me_url($courseObjID, $sectionNumber) {
     '&sectionNumber=' . $sectionNumber;
 }
 */
- 
- 
- 
