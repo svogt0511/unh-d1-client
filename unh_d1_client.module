@@ -95,7 +95,8 @@ function unh_d1_client_menu() {
     'title' => 'UNH DestinyOne',
     'description' => 'UNH settings for DestinyOne web services.',
     'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('administer site configuration'),
+    'access callback' => TRUE,
+    //'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
   );
@@ -106,7 +107,8 @@ function unh_d1_client_menu() {
     'description' => 'Configuration UNH DestinyOne API web client.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('unh_d1_client_settings_form'),
-    'access arguments' => array('administer unh_d1_client'),
+    //'access callback' => TRUE,
+    'access arguments' => array('administer unh_d1_client module'),
     'type' => MENU_NORMAL_ITEM,
   );
 
@@ -128,7 +130,7 @@ function unh_d1_client_menu() {
 */
 function unh_d1_client_permission() {
   return array(
-    'administer unh_d1_client' => array(
+    'administer unh_d1_client module' => array(
       'title' => t('Administer UNH D1 Client Settings'),
       'description' => t('Configure UNH Client module settings for this site.'),
     ),
